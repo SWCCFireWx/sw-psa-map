@@ -29,7 +29,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
-      - run: pip install shapely
+      - run: pip install pandas numpy shapely
       - name: Download PSA boundaries if missing
         run: |
           if [ ! -s docs/psa.geojson ]; then python scripts/psa_pipeline.py fetch-psa --out docs/psa.geojson; fi
