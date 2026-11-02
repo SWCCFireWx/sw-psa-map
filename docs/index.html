@@ -43,6 +43,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .side th{font:600 .68rem var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 .why{margin:0;padding-left:18px;font-size:.88rem}
+.dep{white-space:nowrap}.dep.dry{color:var(--red);font-weight:600}.dep.wet{color:var(--accent);font-weight:600}
 .badge{display:inline-flex;align-items:center;gap:8px;font:600 1rem var(--f-display)}
 .note{font-size:.84rem;color:var(--muted)}
 .lbl{font:700 11px var(--f-mono);color:#111;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;text-align:center}
@@ -55,7 +56,13 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .grid td:first-child,.grid th:first-child{text-align:left;font-family:var(--f-mono);font-weight:600}
 .cell{display:block;min-width:50px;height:26px;line-height:26px;border-radius:3px;font:700 .8rem var(--f-mono);cursor:pointer;border:0;width:100%}
 .cell.ov{box-shadow:inset 0 0 0 2px rgba(0,0,0,.35)}
-.two{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:20px;align-items:start}
+.disc p{max-width:68ch}
+.fig{margin:0;display:flex;flex-direction:column;gap:8px;min-width:0}
+.figbar{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center}
+.figbar .tabs button{padding:5px 10px;font-size:.84rem}
+.fig img{width:100%;height:auto;border:1px solid var(--line);border-radius:4px;background:#fff}
+.fig select{font:600 .85rem var(--f-body);padding:4px 6px;border:1px solid var(--line);border-radius:4px;background:var(--panel);color:var(--ink)}
 @media (max-width:900px){.two{grid-template-columns:1fr}}
 .disc p+p{margin-top:8px}
 .auto{margin:0;padding-left:18px;font-size:.9rem}
@@ -83,20 +90,31 @@ a{color:var(--accent)}
   <div id="map" aria-label="Map of Southwest PSAs"></div>
   <aside class="panel side" id="side"><h3>Select a PSA</h3><p class="note">Click a PSA on the map or a cell in the table to see the inputs and the reasoning behind its color.</p></aside>
 </div>
-<div class="two">
-  <section class="panel scroll"><h2 style="margin-bottom:8px">7-day table</h2><table class="grid" id="grid"></table>
-    <p class="note" style="margin-top:8px">Outlined cells are forecaster overrides from <span class="num">data/overrides.csv</span>.</p></section>
-  <section class="panel disc"><h2 style="margin-bottom:8px">Discussion</h2>
+<section class="panel two">
+  <div class="disc">
+    <h2 style="margin-bottom:8px">Discussion</h2>
     <div id="notes" hidden><h3 style="margin-bottom:4px">Forecaster notes</h3><div id="notesBody"></div><hr style="border:0;border-top:1px solid var(--line);margin:12px 0"></div>
-    <div id="disc"></div><p class="note" style="margin-top:10px">Written automatically from the model blend, FEMS fuels and NIFC fire data each run.</p></section>
-</div>
-<footer>Model guidance from HRRR, RAP, NAM nest, RRFS, NBM, GFS, GEFS, ECMWF IFS and AIFS via Herbie, blended by median. ERC percentiles from SWCC 2015–2024 breakpoints. Guidance only; the forecaster of record makes the call. Official product: <a href="https://fsapps.nwcg.gov/psp/npsg/forecast/#/outlooks?state=map&gaccId=10">NWCG 7-Day Significant Fire Potential</a>.</footer>
+    <div id="disc"></div>
+    <p class="note" style="margin-top:10px">Weather discussion written automatically from the model blend each run.</p>
+  </div>
+  <figure class="fig" id="fig">
+    <div class="figbar">
+      <div class="tabs" id="ftabs" role="group" aria-label="Map field"></div>
+      <label class="note" for="fday">Day <select id="fday"></select></label>
+    </div>
+    <img id="fimg" alt="Forecast map" hidden>
+    <figcaption class="note" id="fcap">Maps appear after the next forecast run.</figcaption>
+  </figure>
+</section>
+<section class="panel scroll"><h2 style="margin-bottom:8px">7-day table</h2><table class="grid" id="grid"></table>
+  <p class="note" style="margin-top:8px">Outlined cells are forecaster overrides from <span class="num">data/overrides.csv</span>.</p></section>
+<footer>Model guidance from HRRR, RAP, NAM nest, NBM, GFS, GEFS, ECMWF IFS and AIFS via Herbie, blended by median. ERC percentiles from SWCC 2015–2024 breakpoints. Guidance only; the forecaster of record makes the call. Official product: <a href="https://fsapps.nwcg.gov/psp/npsg/forecast/#/outlooks?state=map&gaccId=10">NWCG 7-Day Significant Fire Potential</a>.</footer>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 (async function(){
-const PSAS=["SW01","SW02","SW03","SW04","SW05","SW06N","SW06S","SW07","SW08","SW09","SW10","SW11","SW12","SW13","SW14N","SW14S"];
+const PSAS=["SW01","SW02","SW03","SW04","SW05","SW06N","SW06S","SW07","SW08","SW09","SW10","SW11","SW12","SW13","SW14N"];
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue("--"+n).trim();
 const COLOR=c=>css({nodata:"nodata",green:"green",yellow:"yellow",brown:"brown",W:"orange",B:"orange",L:"red"}[c]);
 const CATNAME={nodata:"No data",green:"Little or no risk",yellow:"Low risk",brown:"Moderate risk"};
@@ -119,12 +137,19 @@ $("#tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b
   document.querySelectorAll("#tabs button").forEach(x=>x.setAttribute("aria-pressed",x===b));draw()});
 
 /* map */
-const map=L.map("map",{zoomSnap:.25}).setView([34.3,-108.8],6.25);
+const hasMap=!!window.L;
+const map=hasMap?L.map("map",{zoomSnap:.25}).setView([34.3,-108.8],6.25):null;
+if(!hasMap)$("#map").innerHTML='<p class="note" style="padding:16px">The interactive map could not load. The table, discussion and maps below still work.</p>';
 const dark=matchMedia("(prefers-color-scheme: dark)").matches;
-L.tileLayer(`https://{s}.basemaps.cartocdn.com/${dark?"dark_all":"light_all"}/{z}/{x}/{y}{r}.png`,
-  {attribution:'&copy; OpenStreetMap contributors &copy; CARTO',maxZoom:12}).addTo(map);
-let layer=null,labels=L.layerGroup().addTo(map);
-if(G){
+if(hasMap){
+/* Esri gray canvas basemap: no API key needed */
+L.tileLayer(`https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_${dark?"Dark":"Light"}_Gray_Base/MapServer/tile/{z}/{y}/{x}`,
+  {attribution:'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors',maxZoom:16}).addTo(map);
+L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+  {maxZoom:16,opacity:.55}).addTo(map);
+}
+let layer=null,labels=hasMap?L.layerGroup().addTo(map):null;
+if(G&&hasMap){
   layer=L.geoJSON(G,{style:()=>({weight:1.2,color:"#222",fillOpacity:.72}),
     onEachFeature:(f,l)=>l.on("click",()=>select(f.properties.psa))}).addTo(map);
   map.fitBounds(layer.getBounds(),{padding:[10,10]});
@@ -149,9 +174,12 @@ $("#grid").addEventListener("click",e=>{const b=e.target.closest(".cell");if(!b)
 
 const ROWS=[["wind","Sustained wind","mph"],["gust","Gust","mph"],["minrh","Min RH","%"],["tmax","Max temp","°F"],["qpf","QPF","in"],
  ["thunder","Thunder coverage","%"],["lapse","700–500 lapse","°C/km"],["hdwi","HDWI",""]];
-const FUEL=[["erc","ERC",""],["bi","BI",""],["bi_pct","BI percentile",""],["ic","Ignition component",""],["sc","Spread component",""],
- ["fm1","1-hr FM","%"],["fm10","10-hr FM","%"],["fm100","100-hr FM","%"],["fm1000","1000-hr FM","%"],["kbdi","KBDI",""],
- ["herb","Herbaceous FM","%"],["woody","Woody FM","%"],["gsi","GSI",""],["fires","Active fires (WFIGS)",""]];
+/* [key, label, unit, which direction is drier: +1 higher = drier, -1 lower = drier, 0 = n/a] */
+const FUEL=[["erc","ERC","",1],["bi","BI","",1],["ic","Ignition component","",1],["sc","Spread component","",1],
+ ["fm1","1-hr FM","%",-1],["fm10","10-hr FM","%",-1],["fm100","100-hr FM","%",-1],["fm1000","1000-hr FM","%",-1],
+ ["kbdi","KBDI","",1],["herb","Herbaceous FM","%",-1],["woody","Woody FM","%",-1],["gsi","GSI","",-1],
+ ["bi_pct","BI percentile","",0],["fires","Active fires (WFIGS)","",0]];
+const ord=n=>{n=Math.round(n);const t=n%100;return n+((t>10&&t<14)?"th":({1:"st",2:"nd",3:"rd"}[n%10]||"th"))};
 function select(p){sel=p;draw()}
 function side(p){
   const c=cell(p,day),r=F.psas[p]||{},name=G?(G.features.find(f=>f.properties.psa===p)||{properties:{}}).properties.name:"";
@@ -161,8 +189,16 @@ function side(p){
    <div class="badge"><i class="sw c-${c.trigger||c.category}">${c.trigger||""}</i>${c.trigger?TRIGNAME[c.trigger]+" trigger · "+CATNAME[c.category]:CATNAME[c.category]}</div>
    <ul class="why">${(c.why||[]).map(w=>`<li>${esc(w)}</li>`).join("")}</ul>
    ${c.model_call?`<p class="note">Model-based call: ${CATNAME[c.model_call.category]}${c.model_call.trigger?" + "+c.model_call.trigger:""}</p>`:""}
-   <table><thead><tr><th>Fuels · FEMS</th><th colspan="2">${r.source&&r.source[day]?esc(r.source[day])+(r.n_stations&&r.n_stations[day]?" · "+r.n_stations[day]+" stations":""):"no data"}</th></tr></thead><tbody>`;
-  FUEL.forEach(([k,lab,u])=>{if(v(k)!=="–")h+=`<tr><td>${lab}</td><td class="num" colspan="2">${v(k)} ${u}</td></tr>`});
+   <div class="note">FEMS fuels · ${r.source&&r.source[day]?esc(r.source[day])+(r.n_stations&&r.n_stations[day]?" · average of "+r.n_stations[day]+" stations":""):"no data"}</div>
+   <table><thead><tr><th>Fuels</th><th>Value</th><th>Normal</th><th>vs normal</th></tr></thead><tbody>`;
+  const nrm=k=>r.normal&&r.normal[k]&&r.normal[k][day]!=null?r.normal[k][day]:null;
+  FUEL.forEach(([k,lab,u,dir])=>{const x=v(k);if(x==="–")return;const n=nrm(k);
+    let val=`${x}${u}`;if(k==="erc"&&c.erc_pct!=null)val+=` <span class="note">(~${ord(c.erc_pct)} pct)</span>`;
+    let dep="";if(n!=null&&typeof x==="number"){const d=x-n,mag=Math.abs(d)<0.05?0:d;
+      const fmt=Math.abs(mag)<10&&!Number.isInteger(mag)?Math.abs(mag).toFixed(1):Math.round(Math.abs(mag));
+      if(mag===0)dep=`<span class="dep">near normal</span>`;
+      else{const drier=dir!==0&&Math.sign(mag)===dir;dep=`<span class="dep ${dir===0?"":drier?"dry":"wet"}">${mag>0?"+":"−"}${fmt}${u} ${mag>0?"above":"below"}</span>`}}
+    h+=`<tr><td>${lab}</td><td class="num">${val}</td><td class="num">${n!=null?n+u:"–"}</td><td class="num">${dep||"–"}</td></tr>`});
   h+=`</tbody></table><table><thead><tr><th>Weather</th><th>Blend</th><th>Model range</th></tr></thead><tbody>`;
   ROWS.forEach(([k,lab,u])=>h+=`<tr><td>${lab}</td><td class="num">${v(k)} ${v(k)!=="–"?u:""}</td><td class="num">${sp(k)}</td></tr>`);
   h+="</tbody></table>";
@@ -177,10 +213,30 @@ function side(p){
 const md=t=>"<p>"+esc(t.trim()).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>")+"</p>";
 if(O.discussion&&O.discussion.trim()){$("#notes").hidden=false;$("#notesBody").innerHTML=O.discussion.split(/\n\s*\n/).map(md).join("")}
 $("#disc").innerHTML=(O.auto_discussion&&O.auto_discussion.length?O.auto_discussion:["The discussion appears after the first workflow run."]).map(md).join("");
+/* discussion maps */
+const M=O.maps;
+if(M&&M.fields){
+  const order=["outlook","rh","gust","qpf"].filter(k=>M.fields[k]);
+  const lab={outlook:"Outlook",rh:"Min RH",gust:"Gusts",qpf:"Precip"};
+  let fld=M.featured?M.featured.field:"outlook",fdy=M.featured?M.featured.day:0;
+  if(!M.fields[fld])fld=order[0];
+  $("#ftabs").innerHTML=order.map(k=>`<button data-k="${k}" aria-pressed="${k===fld}">${lab[k]}</button>`).join("");
+  const opts=()=>{const f=M.fields[fld];let h=O.days.map((d,i)=>f.days[i]?`<option value="${i}">Day ${i+1} · ${dl(d)}</option>`:"").join("");
+    if(f.total)h+=`<option value="total">7-day total</option>`;$("#fday").innerHTML=h;
+    if(![...$("#fday").options].some(o=>o.value===String(fdy)))fdy=$("#fday").options[0]?$("#fday").options[0].value:0;$("#fday").value=String(fdy)};
+  const show=(isFeatured)=>{const f=M.fields[fld];const src=fdy==="total"?f.total:f.days[+fdy];
+    if(!src){$("#fimg").hidden=true;$("#fcap").textContent="No map for this day.";return}
+    $("#fimg").src=src+"?v="+encodeURIComponent(O.run.created);$("#fimg").hidden=false;
+    $("#fimg").alt=`${lab[fld]} map, ${fdy==="total"?"7-day total":dl(O.days[+fdy])}`;
+    $("#fcap").textContent=(isFeatured&&M.featured?M.featured.caption+". ":"")+(fld==="outlook"?"PSA outlook from this run.":`Source: ${M.source||"model"}.`)};
+  opts();show(true);
+  $("#ftabs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;fld=b.dataset.k;
+    document.querySelectorAll("#ftabs button").forEach(x=>x.setAttribute("aria-pressed",x===b));opts();show(false)});
+  $("#fday").addEventListener("change",e=>{fdy=e.target.value;show(false)});
+}
 /* active fires */
-const fireLayer=L.layerGroup().addTo(map);
-(O.fires||[]).forEach(f=>L.circleMarker([f.lat,f.lon],{radius:Math.max(5,Math.min(14,Math.sqrt(f.acres)/12)),color:"#111",weight:1.5,fillColor:css("red"),fillOpacity:.9})
-  .bindTooltip(`${esc(f.name)} · ${f.acres.toLocaleString()} ac · ${f.contained??"?"}% contained`).addTo(fireLayer));
+if(hasMap)(O.fires||[]).forEach(f=>L.circleMarker([f.lat,f.lon],{radius:Math.max(5,Math.min(14,Math.sqrt(f.acres)/12)),color:"#111",weight:1.5,fillColor:css("red"),fillOpacity:.9})
+  .bindTooltip(`${esc(f.name)} · ${f.acres.toLocaleString()} ac · ${f.contained??"?"}% contained`).addTo(map));
 draw();
 })();
 </script>
