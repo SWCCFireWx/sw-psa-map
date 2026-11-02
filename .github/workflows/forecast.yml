@@ -4,7 +4,7 @@ on:
   schedule:
     # GitHub schedules are in UTC and do not follow daylight saving.
     - cron: "45 12 * * *"    # 5:45 am MST (6:45 am MDT): 06Z GFS/GEFS/NAM, 00Z ECMWF, latest hourly models, FEMS
-    - cron: "30 6 * * *"     # 11:30 pm MST (12:30 am MDT): 00Z HRRR/NAM/RRFS/GFS/GEFS, ECMWF 00Z if posted (else 12Z), today's 1300 FEMS obs + new NFDRS forecast
+    - cron: "30 6 * * *"     # 11:30 pm MST (12:30 am MDT): 00Z HRRR/NAM/GFS/GEFS, ECMWF 00Z if posted (else 12Z), today's 1300 FEMS obs + new NFDRS forecast
   workflow_dispatch:
     inputs:
       models:
@@ -13,10 +13,12 @@ on:
         default: ""
   push:
     branches: [main]
-    paths: ["data/**", "config/**"]   # edits to fuels, overrides, discussion or thresholds re-color the map without new model runs
+    paths: ["data/**", "config/**"]   # edits to overrides, notes or thresholds trigger a fresh run (about 5 minutes)
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: forecast
@@ -30,14 +32,13 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install pandas numpy shapely
-      - name: Download PSA boundaries if missing
+      - name: Refresh PSA boundaries (keeps the last good copy if NWCG is down)
         run: |
-          if [ ! -s docs/psa.geojson ]; then python scripts/psa_pipeline.py fetch-psa --out docs/psa.geojson; fi
+          python scripts/psa_pipeline.py fetch-psa --out docs/psa.new.geojson && mv docs/psa.new.geojson docs/psa.geojson || test -s docs/psa.geojson
       - uses: actions/upload-artifact@v4
         with: { name: psa, path: docs/psa.geojson }
 
   models:
-    if: github.event_name != 'push'
     needs: psa
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -45,7 +46,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        model: [HRRR, RAP, NAMNEST, RRFS, NBM, GFS, GEFS, IFS, AIFS]
+        model: [HRRR, RAP, NAMNEST, NBM, GFS, GEFS, IFS, AIFS]
     steps:
       - name: Skip models not requested
         id: want
@@ -71,11 +72,10 @@ jobs:
         if: steps.want.outputs.run
         with:
           name: partial-${{ matrix.model }}
-          path: partials/${{ matrix.model }}.csv
+          path: partials/${{ matrix.model }}*
           if-no-files-found: ignore
 
   fems:
-    if: github.event_name != 'push'
     needs: psa
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -110,22 +110,36 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
-      - run: pip install pandas numpy shapely
+      - run: pip install pandas numpy shapely matplotlib
       - uses: actions/download-artifact@v4
         with: { name: psa, path: docs }
       - uses: actions/download-artifact@v4
-        if: github.event_name != 'push'
+        continue-on-error: true
         with: { pattern: partial-*, path: partials, merge-multiple: true }
       - uses: actions/download-artifact@v4
-        if: github.event_name != 'push'
         continue-on-error: true
         with: { name: fems, path: docs }
       - name: Blend, classify, write outlook
         run: python scripts/psa_pipeline.py blend --partials partials
-      - name: Commit updated map data
+      - name: Draw discussion maps
+        continue-on-error: true
+        run: python scripts/psa_pipeline.py maps
+      - name: Commit forecast data (maps are published, not committed)
         run: |
           git config user.name "psa-forecast-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add docs/
+          git add docs/*.json docs/*.csv docs/*.geojson docs/index.html 2>/dev/null || true
           git diff --cached --quiet || git commit -m "Forecast update $(date -u +%Y-%m-%dT%H:%MZ)"
           git pull --rebase -q && git push
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: docs }
+
+  deploy:
+    needs: blend
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
