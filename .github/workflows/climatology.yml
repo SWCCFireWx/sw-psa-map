@@ -1,0 +1,56 @@
+name: Climatology
+
+# Builds BI and ERC percentiles and peak-season temperature references for each PSA
+# from FEMS history, and saves them to config/fems_climo.json.
+# Fully automatic: it checks every night and only does the work when the file is
+# missing or more than a year old. You can also start it from the Actions tab.
+on:
+  schedule:
+    - cron: "15 8 * * *"     # 1:15 am MST check
+  workflow_dispatch:
+    inputs:
+      force: { description: "Rebuild even if current (yes/no)", default: "no" }
+
+permissions:
+  contents: write
+
+concurrency:
+  group: climatology
+  cancel-in-progress: false
+
+jobs:
+  climo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - name: Is a rebuild needed?
+        id: need
+        run: |
+          f=config/fems_climo.json
+          if [ "${{ inputs.force }}" = "yes" ] || [ ! -s "$f" ]; then echo "run=1" >> $GITHUB_OUTPUT; exit 0; fi
+          created=$(python3 -c "import json;print(json.load(open('$f')).get('created','2000-01-01'))")
+          age=$(( ( $(date +%s) - $(date -d "$created" +%s) ) / 86400 ))
+          echo "Climatology is $age days old"
+          if [ $age -gt 365 ]; then echo "run=1" >> $GITHUB_OUTPUT; fi
+      - uses: actions/setup-python@v5
+        if: steps.need.outputs.run
+        with: { python-version: "3.12" }
+      - if: steps.need.outputs.run
+        run: pip install pandas numpy shapely
+      - name: Download PSA boundaries if missing
+        if: steps.need.outputs.run
+        run: if [ ! -s docs/psa.geojson ]; then python scripts/psa_pipeline.py fetch-psa; fi
+      - name: Build percentiles from the last 10 full years
+        if: steps.need.outputs.run
+        run: |
+          y=$(( $(date +%Y) - 1 ))
+          python scripts/psa_pipeline.py fems-climo --start-year $(( y - 9 )) --end-year $y
+      - name: Commit
+        if: steps.need.outputs.run
+        run: |
+          git config user.name "psa-forecast-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add config/fems_climo.json docs/psa.geojson docs/fems_stations.json
+          git diff --cached --quiet || git commit -m "FEMS climatology update"
+          git pull --rebase -q && git push
