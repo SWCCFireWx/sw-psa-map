@@ -48,6 +48,8 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .side th{font:600 .68rem var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 .why{margin:0;padding-left:18px;font-size:.88rem}
+.dl{display:inline-block;padding:1px 8px;border-radius:3px;font:700 .78rem var(--f-mono);text-transform:none;letter-spacing:0}
+.dl0{background:var(--line);color:var(--ink)}.dl1{background:#fee08b;color:#1a1a1a}.dl2{background:#f46d43;color:#1a1a1a}.dl3{background:#a50026;color:#fff}
 .dep{white-space:nowrap}.dep.dry{color:var(--red);font-weight:600}.dep.wet{color:var(--accent);font-weight:600}
 .badge{display:inline-flex;align-items:center;gap:8px;font:600 1rem var(--f-display)}
 .note{font-size:.84rem;color:var(--muted)}
@@ -194,6 +196,9 @@ $("#grid").addEventListener("click",e=>{const b=e.target.closest(".cell");if(!b)
 
 const ROWS=[["wind","Sustained wind","mph"],["gust","Gust","mph"],["minrh","Min RH","%"],["tmax","Max temp","°F"],["qpf","QPF","in"],
  ["thunder","Thunder coverage","%"],["lapse","700–500 lapse","°C/km"],["hdwi","HDWI",""]];
+const DLROWS=[["pwat","Precipitable water","in"],["cbase","Cloud base (AGL)","ft"],["dcape","DCAPE","J/kg"],["motion","Storm motion","kt"],
+ ["dlp_mod","Area moderate+","%"],["dlp_high","Area high","%"]];
+const DLNAME=["None","Low","Moderate","High"];
 /* [key, label, unit, which direction is drier: +1 higher = drier, -1 lower = drier, 0 = n/a] */
 const FUEL=[["erc","ERC","",1],["bi","BI","",1],["ic","Ignition component","",1],["sc","Spread component","",1],
  ["fm1","1-hr FM","%",-1],["fm10","10-hr FM","%",-1],["fm100","100-hr FM","%",-1],["fm1000","1000-hr FM","%",-1],
@@ -222,6 +227,13 @@ function side(p){
   h+=`</tbody></table><table><thead><tr><th>Weather</th><th>Blend</th><th>Model range</th></tr></thead><tbody>`;
   ROWS.forEach(([k,lab,u])=>h+=`<tr><td>${lab}</td><td class="num">${v(k)} ${v(k)!=="–"?u:""}</td><td class="num">${sp(k)}</td></tr>`);
   h+="</tbody></table>";
+  if(DLROWS.some(([k])=>v(k)!=="–")){
+    const lv=r.dlp&&r.dlp[day]!=null?r.dlp[day]:null;
+    h+=`<table><thead><tr><th>Dry lightning</th><th colspan="2"><span class="dl dl${lv??0}">${lv!=null?DLNAME[lv]:"–"}</span></th></tr></thead><tbody>`;
+    DLROWS.forEach(([k,lab,u])=>{const x=v(k);const f=x==="–"?"–":(k==="cbase"||k==="dcape")?Math.round(x).toLocaleString():x;
+      h+=`<tr><td>${lab}</td><td class="num">${f} ${x!=="–"?u:""}</td><td class="num">${sp(k)}</td></tr>`});
+    h+="</tbody></table>";
+  }
   if(r.members&&Object.keys(r.members).length){
     h+=`<details><summary class="note">Each model (gust / min RH / QPF)</summary><table><tbody>`+
       Object.entries(r.members).map(([m,x])=>`<tr><td>${esc(m)}</td><td class="num">${x.gust[day]??"–"} / ${x.minrh[day]??"–"} / ${x.qpf[day]??"–"}</td></tr>`).join("")+"</tbody></table></details>";
@@ -236,8 +248,8 @@ $("#disc").innerHTML=(O.auto_discussion&&O.auto_discussion.length?O.auto_discuss
 /* discussion maps */
 const M=O.maps;
 if(M&&M.fields){
-  const order=["outlook","rh","gust","qpf"].filter(k=>M.fields[k]);
-  const lab={outlook:"Outlook",rh:"Min RH",gust:"Gusts",qpf:"Precip"};
+  const order=["outlook","rh","gust","qpf","dlp"].filter(k=>M.fields[k]);
+  const lab={outlook:"Outlook",rh:"Min RH",gust:"Gusts",qpf:"Precip",dlp:"Dry lightning"};
   let fld=M.featured?M.featured.field:"outlook",fdy=M.featured?M.featured.day:0;
   if(!M.fields[fld])fld=order[0];
   $("#ftabs").innerHTML=order.map(k=>`<button data-k="${k}" aria-pressed="${k===fld}">${lab[k]}</button>`).join("");
@@ -248,7 +260,7 @@ if(M&&M.fields){
     if(!src){$("#fimg").hidden=true;$("#fcap").textContent="No map for this day.";return}
     $("#fimg").src=src+"?v="+encodeURIComponent(O.run.created);$("#fimg").hidden=false;
     $("#fimg").alt=`${lab[fld]} map, ${fdy==="total"?"7-day total":dl(O.days[+fdy])}`;
-    $("#fcap").textContent=(isFeatured&&M.featured?M.featured.caption+". ":"")+(fld==="outlook"?"PSA outlook from this run.":`Source: ${M.source||"model"}.`)};
+    $("#fcap").textContent=(isFeatured&&M.featured?M.featured.caption+". ":"")+(fld==="outlook"?"PSA outlook from this run.":`Source: ${f.source||M.source||"model"}.`)+(fld==="dlp"?" Where storms can form, points score 0–7 from precipitable water, cloud-base height, DCAPE and storm motion.":"")};
   opts();show(true);
   $("#ftabs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;fld=b.dataset.k;
     document.querySelectorAll("#ftabs button").forEach(x=>x.setAttribute("aria-pressed",x===b));opts();show(false)});
