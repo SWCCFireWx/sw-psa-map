@@ -47,8 +47,6 @@ SW_BBOX = (-115.5, -102.5, 30.5, 37.8)
 SW_PSAS = ["SW01", "SW02", "SW03", "SW04", "SW05", "SW06N", "SW06S", "SW07",
            "SW08", "SW09", "SW10", "SW11", "SW12", "SW13", "SW14N", "SW14S"]
 FIELDS = ["wind", "gust", "minrh", "tmax", "qpf", "thunder", "lapse", "hdwi"]
-PSA_SERVICE = ("https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services/"
-               "National_PSA_Current/FeatureServer/0/query")
 
 GRIB = {
     "t2": r":TMP:2 m above ground", "rh2": r":RH:2 m above ground", "d2": r":DPT:2 m above ground",
@@ -82,22 +80,80 @@ MS_TO_MPH, MM_TO_IN = 2.23694, 1 / 25.4
 
 
 # ------------------------------------------------------------------ PSAs
+PSA_SOURCES = [
+    # ArcGIS feature service, queried by map area so no field names are needed
+    ("query", "https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services/National_PSA_Current/FeatureServer/0/query"),
+    # NIFC Open Data direct downloads (whole country; filtered below)
+    ("file", "https://opendata.arcgis.com/api/v3/datasets/national-predictive-service-areas-psa-boundaries/downloads/data?format=geojson&spatialRefId=4326"),
+    ("file", "https://data-nifc.opendata.arcgis.com/datasets/nifc::national-predictive-service-areas-psa-boundaries.geojson"),
+]
+
+
+def _psa_code(props):
+    """Find an SW PSA id in any attribute, e.g. 'SW06N', 'SW 6N', 'sw06n'."""
+    for v in props.values():
+        m = re.fullmatch(r"SW[\s_-]*0?(\d{1,2})([NS]?)", str(v).strip().upper())
+        if m:
+            return f"SW{int(m.group(1)):02d}{m.group(2)}"
+    return None
+
+
+def _psa_name(props):
+    for k, v in props.items():
+        if "name" in k.lower() and v and not _psa_code({k: v}):
+            return str(v)
+    return None
+
+
 def cmd_fetch_psa(a):
-    q = urllib.parse.urlencode({"where": "PSANationalCode LIKE 'SW%'", "outFields": "PSANationalCode,PSAName",
-                                "outSR": 4326, "f": "geojson"})
-    with urllib.request.urlopen(f"{PSA_SERVICE}?{q}", timeout=120) as r:
-        gj = json.load(r)
     import shapely.geometry as sg
-    feats = []
+    from shapely.ops import unary_union
+    lon0, lon1, lat0, lat1 = SW_BBOX
+    tried = []
+    gj = None
+    for kind, url in PSA_SOURCES:
+        if kind == "query":
+            q = urllib.parse.urlencode({"where": "1=1", "outFields": "*", "outSR": 4326, "f": "geojson",
+                                        "geometry": f"{lon0},{lat0},{lon1},{lat1}", "geometryType": "esriGeometryEnvelope",
+                                        "inSR": 4326, "spatialRel": "esriSpatialRelIntersects", "resultRecordCount": 2000})
+            url = f"{url}?{q}"
+        try:
+            txt = _http(url, timeout=300)
+            js = json.loads(txt)
+            feats = js.get("features")
+            if not feats:
+                tried.append(f"{url[:100]} -> {txt[:300]}")
+                continue
+            if any(_psa_code(f.get("properties") or {}) for f in feats):
+                gj = js
+                print(f"PSA boundaries from {url[:100]}")
+                break
+            tried.append(f"{url[:100]} -> no SW PSA codes in fields {list((feats[0].get('properties') or {}).keys())}")
+        except Exception as e:
+            tried.append(f"{url[:100]} -> {e}")
+    if gj is None:
+        print("Could not get PSA boundaries. Responses:")
+        for t in tried:
+            print("  " + t)
+        sys.exit(1)
+
+    parts, names = {}, {}
     for f in gj["features"]:
-        p = f["properties"]
-        code = str(p.get("PSANationalCode", "")).upper().replace(" ", "")
-        geom = sg.shape(f["geometry"]).simplify(0.005, preserve_topology=True)
+        pr = f.get("properties") or {}
+        code = _psa_code(pr)
+        if not code or not f.get("geometry"):
+            continue
+        parts.setdefault(code, []).append(sg.shape(f["geometry"]).buffer(0))
+        names.setdefault(code, _psa_name(pr))
+    feats = []
+    for code in sorted(parts):
+        geom = unary_union(parts[code]).simplify(0.005, preserve_topology=True)
         pt = geom.representative_point()
         feats.append({"type": "Feature", "geometry": sg.mapping(geom),
-                      "properties": {"psa": code, "name": p.get("PSAName"), "lx": round(pt.x, 3), "ly": round(pt.y, 3)}})
-    if not feats:
-        sys.exit("No SW PSAs returned by the NIFC service.")
+                      "properties": {"psa": code, "name": names[code], "lx": round(pt.x, 3), "ly": round(pt.y, 3)}})
+    missing = [p for p in SW_PSAS if p not in parts]
+    if missing:
+        print(f"Warning: no boundary found for {', '.join(missing)}")
     os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
     with open(a.out, "w") as fh:
         json.dump({"type": "FeatureCollection", "features": feats}, fh)
