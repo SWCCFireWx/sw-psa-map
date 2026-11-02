@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Southwest 7-Day Fire Potential</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: map-first console. Day tabs over a map, PSA detail beside it, grid and discussion below. */
+:root{
+  --bg:#f3f2ee;--panel:#fff;--ink:#1d2326;--muted:#5d666b;--line:#d9d7cf;--accent:#2f5d73;
+  --nodata:#9aa0a3;--green:#3f9a3f;--yellow:#e8cf2c;--brown:#8a5a2b;--orange:#f08c1e;--red:#d22b25;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Source Sans 3","Segoe UI",Helvetica,Arial,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root{--bg:#15191b;--panel:#1e2427;--ink:#e7e9e8;--muted:#9aa4a8;--line:#323b3f;--accent:#7fb2c9;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body)}
+.wrap{max-width:1280px;margin:0 auto;padding:18px max(16px,env(safe-area-inset-right)) 48px max(16px,env(safe-area-inset-left));display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance}
+h1{font-size:2.1rem;line-height:1.05}h2{font-size:1.45rem}h3{font-size:1.15rem}
+p{margin:0;max-width:75ch}
+.eyebrow{font:600 .72rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:12px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.82rem}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.sw{width:22px;height:16px;border-radius:2px;display:inline-grid;place-items:center;font:700 .72rem var(--f-mono);color:#1a1a1a}
+.c-nodata{background:var(--nodata)}.c-green{background:var(--green);color:#fff}.c-yellow{background:var(--yellow)}
+.c-brown{background:var(--brown);color:#fff}.c-W,.c-B{background:var(--orange)}.c-L{background:var(--red);color:#fff}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tabs button{font:600 .9rem var(--f-body);padding:7px 12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:4px;cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px}
+@media (max-width:900px){.main{grid-template-columns:1fr}}
+#map{height:min(72vh,640px);min-height:380px;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px;min-width:0}
+.side{display:flex;flex-direction:column;gap:10px}
+.side table{width:100%;border-collapse:collapse;font-size:.86rem}
+.side td,.side th{padding:4px 6px;border-bottom:1px solid var(--line);text-align:left}
+.side th{font:600 .68rem var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.why{margin:0;padding-left:18px;font-size:.88rem}
+.badge{display:inline-flex;align-items:center;gap:8px;font:600 1rem var(--f-display)}
+.note{font-size:.84rem;color:var(--muted)}
+.lbl{font:700 11px var(--f-mono);color:#111;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;text-align:center}
+.lbl b{display:inline-block;margin-left:3px;padding:0 4px;border-radius:2px;color:#fff;text-shadow:none}
+.lbl b.W,.lbl b.B{background:var(--orange);color:#111}.lbl b.L{background:var(--red)}
+.scroll{overflow-x:auto}
+.grid{border-collapse:collapse;width:100%;font-size:.85rem}
+.grid th,.grid td{padding:3px;text-align:center;border-bottom:1px solid var(--line)}
+.grid th{font:600 .7rem var(--f-mono);text-transform:uppercase;color:var(--muted)}
+.grid td:first-child,.grid th:first-child{text-align:left;font-family:var(--f-mono);font-weight:600}
+.cell{display:block;min-width:50px;height:26px;line-height:26px;border-radius:3px;font:700 .8rem var(--f-mono);cursor:pointer;border:0;width:100%}
+.cell.ov{box-shadow:inset 0 0 0 2px rgba(0,0,0,.35)}
+.two{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px}
+@media (max-width:900px){.two{grid-template-columns:1fr}}
+.disc p+p{margin-top:8px}
+.auto{margin:0;padding-left:18px;font-size:.9rem}
+#msg{padding:10px 14px;border-left:4px solid var(--orange);background:var(--panel)}
+footer{font-size:.8rem;color:var(--muted)}
+a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <div class="eyebrow">Southwest Area Predictive Services · <span id="runinfo">loading…</span></div>
+    <h1>Southwest 7-Day Significant Fire Potential</h1>
+  </div>
+  <div class="legend">
+    <span><i class="sw c-nodata"></i>No data</span><span><i class="sw c-green"></i>Little/no risk</span>
+    <span><i class="sw c-yellow"></i>Low risk</span><span><i class="sw c-brown"></i>Moderate risk</span>
+    <span><i class="sw c-W">W</i>Wind</span><span><i class="sw c-L">L</i>Lightning</span><span><i class="sw c-B">B</i>Burn env.</span><span><i style="width:12px;height:12px;border-radius:50%;background:var(--red);border:1.5px solid #111;display:inline-block"></i>Active fire</span>
+  </div>
+</header>
+<div id="msg" hidden></div>
+<div class="tabs" id="tabs" role="group" aria-label="Forecast day"></div>
+<div class="main">
+  <div id="map" aria-label="Map of Southwest PSAs"></div>
+  <aside class="panel side" id="side"><h3>Select a PSA</h3><p class="note">Click a PSA on the map or a cell in the table to see the inputs and the reasoning behind its color.</p></aside>
+</div>
+<div class="two">
+  <section class="panel scroll"><h2 style="margin-bottom:8px">7-day table</h2><table class="grid" id="grid"></table>
+    <p class="note" style="margin-top:8px">Outlined cells are forecaster overrides from <span class="num">data/overrides.csv</span>.</p></section>
+  <section class="panel disc"><h2 style="margin-bottom:8px">Discussion</h2>
+    <div id="notes" hidden><h3 style="margin-bottom:4px">Forecaster notes</h3><div id="notesBody"></div><hr style="border:0;border-top:1px solid var(--line);margin:12px 0"></div>
+    <div id="disc"></div><p class="note" style="margin-top:10px">Written automatically from the model blend, FEMS fuels and NIFC fire data each run.</p></section>
+</div>
+<footer>Model guidance from HRRR, RAP, NAM nest, RRFS, NBM, GFS, GEFS, ECMWF IFS and AIFS via Herbie, blended by median. ERC percentiles from SWCC 2015–2024 breakpoints. Guidance only; the forecaster of record makes the call. Official product: <a href="https://fsapps.nwcg.gov/psp/npsg/forecast/#/outlooks?state=map&gaccId=10">NWCG 7-Day Significant Fire Potential</a>.</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(async function(){
+const PSAS=["SW01","SW02","SW03","SW04","SW05","SW06N","SW06S","SW07","SW08","SW09","SW10","SW11","SW12","SW13","SW14N","SW14S"];
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue("--"+n).trim();
+const COLOR=c=>css({nodata:"nodata",green:"green",yellow:"yellow",brown:"brown",W:"orange",B:"orange",L:"red"}[c]);
+const CATNAME={nodata:"No data",green:"Little or no risk",yellow:"Low risk",brown:"Moderate risk"};
+const TRIGNAME={W:"Wind",L:"Lightning",B:"Burn environment"};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const get=async u=>{const r=await fetch(u+"?v="+Date.now());if(!r.ok)throw new Error(u+" "+r.status);return r.json()};
+
+let O,F,G=null,day=0,sel=null;
+try{O=await get("outlook.json");F=await get("forecast.json")}catch(e){$("#msg").hidden=false;$("#msg").textContent="Forecast files are missing. Run the Forecast workflow in GitHub Actions.";return}
+try{G=await get("psa.geojson")}catch(e){$("#msg").hidden=false;$("#msg").textContent="PSA boundaries are not downloaded yet. Run the Forecast workflow once; the table and discussion below still work."}
+
+const dl=iso=>{const d=new Date(iso+"T12:00:00");return d.toLocaleDateString("en-US",{weekday:"short",month:"numeric",day:"numeric"})};
+const models=(O.run.models||[]).map(m=>m.model).join(", ")||"no models yet";
+$("#runinfo").textContent=`Updated ${O.run.created.replace("T"," ")} · ${models}`;
+const cell=(p,d)=>O.outlook[p]?O.outlook[p][d]:{category:"nodata",trigger:null,why:[]};
+
+$("#tabs").innerHTML=O.days.map((d,i)=>`<button data-d="${i}" aria-pressed="${i===0}">Day ${i+1} · ${dl(d)}</button>`).join("");
+$("#tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;day=+b.dataset.d;
+  document.querySelectorAll("#tabs button").forEach(x=>x.setAttribute("aria-pressed",x===b));draw()});
+
+/* map */
+const map=L.map("map",{zoomSnap:.25}).setView([34.3,-108.8],6.25);
+const dark=matchMedia("(prefers-color-scheme: dark)").matches;
+L.tileLayer(`https://{s}.basemaps.cartocdn.com/${dark?"dark_all":"light_all"}/{z}/{x}/{y}{r}.png`,
+  {attribution:'&copy; OpenStreetMap contributors &copy; CARTO',maxZoom:12}).addTo(map);
+let layer=null,labels=L.layerGroup().addTo(map);
+if(G){
+  layer=L.geoJSON(G,{style:()=>({weight:1.2,color:"#222",fillOpacity:.72}),
+    onEachFeature:(f,l)=>l.on("click",()=>select(f.properties.psa))}).addTo(map);
+  map.fitBounds(layer.getBounds(),{padding:[10,10]});
+}
+function draw(){
+  if(layer){layer.setStyle(f=>{const c=cell(f.properties.psa,day);
+    return {fillColor:COLOR(c.trigger||c.category),weight:f.properties.psa===sel?3:1.2,color:f.properties.psa===sel?css("ink"):"#222",fillOpacity:.72}});
+    labels.clearLayers();
+    G.features.forEach(f=>{const p=f.properties,c=cell(p.psa,day);
+      L.marker([p.ly,p.lx],{interactive:false,icon:L.divIcon({className:"lbl",iconSize:[70,16],
+        html:`${p.psa.replace("SW","")}${c.trigger?`<b class="${c.trigger}">${c.trigger}</b>`:""}`})}).addTo(labels)})}
+  grid();if(sel)side(sel);
+}
+function grid(){
+  let h="<thead><tr><th>PSA</th>"+O.days.map(dl).map(x=>`<th>${x}</th>`).join("")+"</tr></thead><tbody>";
+  PSAS.forEach(p=>{h+=`<tr><td>${p}</td>`+O.days.map((_,d)=>{const c=cell(p,d);
+    return `<td><button class="cell c-${c.trigger||c.category}${c.override?" ov":""}" data-p="${p}" data-d="${d}" aria-label="${p} ${dl(O.days[d])}: ${c.trigger?TRIGNAME[c.trigger]:CATNAME[c.category]}" ${d===day?'style="outline:2px solid var(--ink)"':""}>${c.trigger||""}</button></td>`}).join("")+"</tr>"});
+  $("#grid").innerHTML=h+"</tbody>";
+}
+$("#grid").addEventListener("click",e=>{const b=e.target.closest(".cell");if(!b)return;day=+b.dataset.d;
+  document.querySelectorAll("#tabs button").forEach(x=>x.setAttribute("aria-pressed",+x.dataset.d===day));select(b.dataset.p)});
+
+const ROWS=[["wind","Sustained wind","mph"],["gust","Gust","mph"],["minrh","Min RH","%"],["tmax","Max temp","°F"],["qpf","QPF","in"],
+ ["thunder","Thunder coverage","%"],["lapse","700–500 lapse","°C/km"],["hdwi","HDWI",""]];
+const FUEL=[["erc","ERC",""],["bi","BI",""],["bi_pct","BI percentile",""],["ic","Ignition component",""],["sc","Spread component",""],
+ ["fm1","1-hr FM","%"],["fm10","10-hr FM","%"],["fm100","100-hr FM","%"],["fm1000","1000-hr FM","%"],["kbdi","KBDI",""],
+ ["herb","Herbaceous FM","%"],["woody","Woody FM","%"],["gsi","GSI",""],["fires","Active fires (WFIGS)",""]];
+function select(p){sel=p;draw()}
+function side(p){
+  const c=cell(p,day),r=F.psas[p]||{},name=G?(G.features.find(f=>f.properties.psa===p)||{properties:{}}).properties.name:"";
+  const v=(k)=>r[k]&&r[k][day]!=null?r[k][day]:"–";
+  const sp=(k)=>r.spread&&r.spread[k]&&r.spread[k][day]?`${r.spread[k][day][0]}–${r.spread[k][day][1]}`:"";
+  let h=`<div class="eyebrow">${esc(p)}${name?" · "+esc(name):""} · ${dl(O.days[day])}</div>
+   <div class="badge"><i class="sw c-${c.trigger||c.category}">${c.trigger||""}</i>${c.trigger?TRIGNAME[c.trigger]+" trigger · "+CATNAME[c.category]:CATNAME[c.category]}</div>
+   <ul class="why">${(c.why||[]).map(w=>`<li>${esc(w)}</li>`).join("")}</ul>
+   ${c.model_call?`<p class="note">Model-based call: ${CATNAME[c.model_call.category]}${c.model_call.trigger?" + "+c.model_call.trigger:""}</p>`:""}
+   <table><thead><tr><th>Fuels · FEMS</th><th colspan="2">${r.source&&r.source[day]?esc(r.source[day])+(r.n_stations&&r.n_stations[day]?" · "+r.n_stations[day]+" stations":""):"no data"}</th></tr></thead><tbody>`;
+  FUEL.forEach(([k,lab,u])=>{if(v(k)!=="–")h+=`<tr><td>${lab}</td><td class="num" colspan="2">${v(k)} ${u}</td></tr>`});
+  h+=`</tbody></table><table><thead><tr><th>Weather</th><th>Blend</th><th>Model range</th></tr></thead><tbody>`;
+  ROWS.forEach(([k,lab,u])=>h+=`<tr><td>${lab}</td><td class="num">${v(k)} ${v(k)!=="–"?u:""}</td><td class="num">${sp(k)}</td></tr>`);
+  h+="</tbody></table>";
+  if(r.members&&Object.keys(r.members).length){
+    h+=`<details><summary class="note">Each model (gust / min RH / QPF)</summary><table><tbody>`+
+      Object.entries(r.members).map(([m,x])=>`<tr><td>${esc(m)}</td><td class="num">${x.gust[day]??"–"} / ${x.minrh[day]??"–"} / ${x.qpf[day]??"–"}</td></tr>`).join("")+"</tbody></table></details>";
+  }
+  $("#side").innerHTML=h;
+}
+
+/* discussion: light markdown (**bold**, paragraphs) */
+const md=t=>"<p>"+esc(t.trim()).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>")+"</p>";
+if(O.discussion&&O.discussion.trim()){$("#notes").hidden=false;$("#notesBody").innerHTML=O.discussion.split(/\n\s*\n/).map(md).join("")}
+$("#disc").innerHTML=(O.auto_discussion&&O.auto_discussion.length?O.auto_discussion:["The discussion appears after the first workflow run."]).map(md).join("");
+/* active fires */
+const fireLayer=L.layerGroup().addTo(map);
+(O.fires||[]).forEach(f=>L.circleMarker([f.lat,f.lon],{radius:Math.max(5,Math.min(14,Math.sqrt(f.acres)/12)),color:"#111",weight:1.5,fillColor:css("red"),fillOpacity:.9})
+  .bindTooltip(`${esc(f.name)} · ${f.acres.toLocaleString()} ac · ${f.contained??"?"}% contained`).addTo(fireLayer));
+draw();
+})();
+</script>
+</body>
+</html>

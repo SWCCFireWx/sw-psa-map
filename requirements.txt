@@ -1,0 +1,7 @@
+herbie-data>=2025.1.0
+cfgrib
+eccodes
+xarray
+pandas
+numpy
+shapely>=2.0
