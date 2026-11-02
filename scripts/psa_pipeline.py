@@ -80,8 +80,11 @@ MS_TO_MPH, MM_TO_IN = 2.23694, 1 / 25.4
 
 
 # ------------------------------------------------------------------ PSAs
+NWCG_PSP = "https://fsapps.nwcg.gov/psp/arcgis/rest/services/npsg/PSA_GACC_KeyRAWS/MapServer"
 PSA_SOURCES = [
-    # ArcGIS feature service, queried by map area so no field names are needed
+    # NWCG Predictive Services public map service (layer 1 = PSA boundaries), queried by map area
+    ("query", NWCG_PSP + "/1/query"),
+    # NIFC feature service (may require a token) and Open Data downloads as fallbacks
     ("query", "https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services/National_PSA_Current/FeatureServer/0/query"),
     # NIFC Open Data direct downloads (whole country; filtered below)
     ("file", "https://opendata.arcgis.com/api/v3/datasets/national-predictive-service-areas-psa-boundaries/downloads/data?format=geojson&spatialRefId=4326"),
@@ -635,8 +638,30 @@ def fems_download(station_ids, start, end, dataset="all", fuel="Y"):
     return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
 
 
+def nwcg_key_raws():
+    """SWCC key RAWS per PSA from the NWCG Predictive Services map service (layer 2)."""
+    lon0, lon1, lat0, lat1 = SW_BBOX
+    q = urllib.parse.urlencode({"where": "1=1", "outFields": "*", "f": "json", "returnGeometry": "false",
+                                "geometry": f"{lon0},{lat0},{lon1},{lat1}", "geometryType": "esriGeometryEnvelope",
+                                "inSR": 4326, "spatialRel": "esriSpatialRelIntersects"})
+    js = json.loads(_http(f"{NWCG_PSP}/2/query?{q}"))
+    out = {}
+    for f in js.get("features", []):
+        at = f.get("attributes") or {}
+        psa = _psa_code(at)
+        sid = None
+        for k, v in at.items():
+            if any(t in k.lower() for t in ("wims", "station_id", "stationid", "nfdrs", "raws_id", "sta_id")):
+                if re.fullmatch(r"\d{5,6}", str(v).strip().split(".")[0]):
+                    sid = str(v).strip().split(".")[0]
+                    break
+        if psa and sid:
+            out.setdefault(psa, []).append({"id": sid, "name": next((str(v) for k, v in at.items() if "name" in k.lower() and v), None)})
+    return out
+
+
 def load_station_map(a):
-    """config/stations.json (your SIG lists) wins; otherwise the discovered list in docs/fems_stations.json."""
+    """config/stations.json (your SIG lists) wins; then SWCC key RAWS from NWCG; then every station found in the PSA."""
     manual = json.load(open(a.stations)) if os.path.exists(a.stations) else {}
     manual = {k: v for k, v in manual.items() if not k.startswith("_") and v}
     auto = {}
@@ -644,9 +669,21 @@ def load_station_map(a):
         if os.path.exists(a.discovered) and not getattr(a, "rediscover", False):
             auto = json.load(open(a.discovered))
         else:
-            auto = fems_discover_stations(a.psa)
+            key = {}
+            try:
+                key = nwcg_key_raws()
+                print(f"NWCG key RAWS: {sum(len(v) for v in key.values())} stations in {len(key)} PSAs")
+            except Exception as e:
+                print(f"NWCG key RAWS unavailable ({e})")
+            found = {}
+            if len(key) < len(SW_PSAS):
+                try:
+                    found = fems_discover_stations(a.psa)
+                except Exception as e:
+                    print(f"FEMS station search failed ({e})")
+            auto = {p: key.get(p) or found.get(p, []) for p in SW_PSAS}
             json.dump(auto, open(a.discovered, "w"), indent=1)
-            print(f"Discovered {sum(len(v) for v in auto.values())} FEMS stations -> {a.discovered}")
+            print(f"Station list: {sum(len(v) for v in auto.values())} stations -> {a.discovered}")
     smap = {}
     for p in SW_PSAS:
         if p in manual:
