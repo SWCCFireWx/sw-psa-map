@@ -24,6 +24,11 @@ h1{font-size:2.1rem;line-height:1.05}h2{font-size:1.45rem}h3{font-size:1.15rem}
 p{margin:0;max-width:75ch}
 .eyebrow{font:600 .72rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:12px}
+.updated{display:inline-flex;align-items:center;gap:8px;margin-top:8px;padding:5px 10px;border:1px solid var(--line);border-radius:4px;background:var(--panel);font-size:.9rem}
+.updated b{font-weight:700}
+.updated .dot{width:9px;height:9px;border-radius:50%;background:var(--green);flex:none}
+.updated.stale{border-color:var(--orange)}
+.updated.stale .dot{background:var(--orange)}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.82rem}
 .legend span{display:inline-flex;gap:6px;align-items:center}
 .sw{width:22px;height:16px;border-radius:2px;display:inline-grid;place-items:center;font:700 .72rem var(--f-mono);color:#1a1a1a}
@@ -77,6 +82,7 @@ a{color:var(--accent)}
   <div>
     <div class="eyebrow">Southwest Area Predictive Services · <span id="runinfo">loading…</span></div>
     <h1>Southwest 7-Day Significant Fire Potential</h1>
+    <div class="updated" id="updated" aria-live="polite"><span class="dot"></span><span id="updtext">Loading…</span></div>
   </div>
   <div class="legend">
     <span><i class="sw c-nodata"></i>No data</span><span><i class="sw c-green"></i>Little/no risk</span>
@@ -129,7 +135,21 @@ try{G=await get("psa.geojson")}catch(e){$("#msg").hidden=false;$("#msg").textCon
 
 const dl=iso=>{const d=new Date(iso+"T12:00:00");return d.toLocaleDateString("en-US",{weekday:"short",month:"numeric",day:"numeric"})};
 const models=(O.run.models||[]).map(m=>m.model).join(", ")||"no models yet";
-$("#runinfo").textContent=`Updated ${O.run.created.replace("T"," ")} · ${models}`;
+$("#runinfo").textContent=models;
+/* when the page was updated, in New Mexico time, plus the next scheduled run */
+(function(){
+  const m=/^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d)/.exec(O.run.created||"");
+  if(!m){$("#updtext").textContent="Update time unknown";return}
+  const t=new Date(Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5]));
+  const fmt=d=>d.toLocaleString("en-US",{timeZone:"America/Denver",weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit",timeZoneName:"short"});
+  const hrs=(Date.now()-t)/36e5;
+  const ago=hrs<1?`${Math.max(1,Math.round(hrs*60))} min ago`:hrs<48?`${Math.round(hrs)} hr ago`:`${Math.round(hrs/24)} days ago`;
+  /* scheduled runs: 12:45 and 06:30 UTC */
+  const now=new Date(),c=[];for(let d=0;d<2;d++)for(const [h,mi] of [[12,45],[6,30]]){const x=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()+d,h,mi));if(x>now)c.push(x)}
+  const next=c.sort((a,b)=>a-b)[0];
+  $("#updtext").innerHTML=`Updated <b>${fmt(t)}</b> (${ago}) · Next update about ${next.toLocaleString("en-US",{timeZone:"America/Denver",hour:"numeric",minute:"2-digit",timeZoneName:"short"})}`;
+  if(hrs>20){$("#updated").classList.add("stale");$("#updtext").innerHTML+=" · <b>A scheduled update was missed</b>; check the Actions tab."}
+})();
 const cell=(p,d)=>O.outlook[p]?O.outlook[p][d]:{category:"nodata",trigger:null,why:[]};
 
 $("#tabs").innerHTML=O.days.map((d,i)=>`<button data-d="${i}" aria-pressed="${i===0}">Day ${i+1} · ${dl(d)}</button>`).join("");
