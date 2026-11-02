@@ -141,11 +141,33 @@ def vpd_hpa(t_k, rh):
     return 6.112 * np.exp(17.67 * t / (t + 243.5)) * (1 - rh / 100)
 
 
+# Which cycles to use: (every N hours, first cycle hour, hours after cycle before it is usually posted).
+# HRRR 00/06/12/18Z and RAP 03/09/15/21Z run long (48-51 h); NBM 01/07/13/19Z are the full runs;
+# ECMWF open data 06/18Z stop at day 4, so IFS/AIFS use 00/12Z.
+CYCLES = {"HRRR": (6, 0, 2), "RAP": (6, 3, 2), "NBM": (6, 1, 2), "NAMNEST": (6, 0, 4), "RRFS": (6, 0, 4),
+          "GFS": (6, 0, 5), "GEFS": (6, 0, 6), "IFS": (12, 0, 6), "AIFS": (12, 0, 6)}
+
+
 def latest_init(name, now):
-    kw, _, _, step = MODELS[name]
-    lag = 2 if step == 1 else 6
-    t = now - timedelta(hours=lag)
-    return t.replace(minute=0, second=0, microsecond=0, hour=(t.hour // step) * step)
+    step, off, lag = CYCLES[name]
+    t = (now - timedelta(hours=lag)).replace(minute=0, second=0, microsecond=0)
+    return t - timedelta(hours=(t.hour - off) % step)
+
+
+def pick_init(name, kw, hours, days, first):
+    """Use the newest cycle whose last needed forecast hour is posted; else step back up to 2 cycles."""
+    from herbie import Herbie
+    step = CYCLES[name][0]
+    for k in range(3):
+        init = first - timedelta(hours=step * k)
+        need = [f for f in hours if (init + timedelta(hours=f)).astimezone(MST).date() <= days[-1]]
+        try:
+            if need and Herbie(init.replace(tzinfo=None), fxx=need[-1], verbose=False, **kw).grib is not None:
+                return init
+        except Exception:
+            pass
+        print(f"[{name}] {init:%d %HZ} not complete yet, trying the cycle before", flush=True)
+    return first
 
 
 def cmd_model(a):
@@ -157,7 +179,7 @@ def cmd_model(a):
     now = datetime.now(timezone.utc)
     days = [now.astimezone(MST).date() + timedelta(days=i) for i in range(7)]
     init = (datetime.strptime(a.init, "%Y-%m-%dT%H").replace(tzinfo=timezone.utc) if a.init
-            else latest_init(name, now))
+            else pick_init(name, kw, hours, days, latest_init(name, now)))
     psas = load_psas(a.psa)
     print(f"[{name}] init {init:%Y-%m-%d %HZ}", flush=True)
 
