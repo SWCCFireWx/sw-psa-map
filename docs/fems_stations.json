@@ -1,0 +1,606 @@
+{
+ "SW01": [
+  {
+   "id": "20211",
+   "name": "BRIGHT ANGEL"
+  },
+  {
+   "id": "20212",
+   "name": "DRY PARK"
+  },
+  {
+   "id": "20213",
+   "name": "FRAZIER WELLS"
+  },
+  {
+   "id": "20220",
+   "name": "LINDBERGH HILL"
+  },
+  {
+   "id": "20207",
+   "name": "TUSAYAN"
+  },
+  {
+   "id": "20216",
+   "name": "WARM SPRINGS CANYON"
+  }
+ ],
+ "SW02": [
+  {
+   "id": "20511",
+   "name": "CHERRY"
+  },
+  {
+   "id": "20502",
+   "name": "CROWN KING"
+  },
+  {
+   "id": "20507",
+   "name": "GOODWIN MESA"
+  },
+  {
+   "id": "20118",
+   "name": "HAVASU"
+  },
+  {
+   "id": "20508",
+   "name": "HUMBUG CREEK"
+  },
+  {
+   "id": "20501",
+   "name": "IRON SPRINGS"
+  },
+  {
+   "id": "20115",
+   "name": "MOSS BASIN"
+  },
+  {
+   "id": "20119",
+   "name": "MUSIC MOUNTAIN"
+  },
+  {
+   "id": "21501",
+   "name": "SMITH PEAK"
+  },
+  {
+   "id": "20509",
+   "name": "STANTON"
+  },
+  {
+   "id": "20510",
+   "name": "SUNSET POINT"
+  },
+  {
+   "id": "20120",
+   "name": "TRUXTON CANYON"
+  },
+  {
+   "id": "20116",
+   "name": "UNION PASS"
+  }
+ ],
+ "SW03": [
+  {
+   "id": "21503",
+   "name": "AHAKHAV PRESERVE"
+  },
+  {
+   "id": "21504",
+   "name": "BELMONT"
+  },
+  {
+   "id": "20121",
+   "name": "CIBOLA"
+  },
+  {
+   "id": "20102",
+   "name": "FORT YUMA"
+  },
+  {
+   "id": "21502",
+   "name": "OATMAN"
+  },
+  {
+   "id": "21209",
+   "name": "SELLS"
+  }
+ ],
+ "SW04": [
+  {
+   "id": "20312",
+   "name": "HOPI"
+  },
+  {
+   "id": "20307",
+   "name": "NAVAJO MONUMENT"
+  },
+  {
+   "id": "20402",
+   "name": "PINEY HILL"
+  },
+  {
+   "id": "290102",
+   "name": "ALBINO CANYON"
+  },
+  {
+   "id": "290101",
+   "name": "WASHINGTON PASS"
+  },
+  {
+   "id": "290603",
+   "name": "ZUNI BUTTES"
+  }
+ ],
+ "SW05": [
+  {
+   "id": "20209",
+   "name": "FLAGSTAFF"
+  },
+  {
+   "id": "20284",
+   "name": "GREENBASE"
+  },
+  {
+   "id": "20291",
+   "name": "HAPPY JACK"
+  },
+  {
+   "id": "20301",
+   "name": "HEBER"
+  },
+  {
+   "id": "20309",
+   "name": "LIMESTONE CANYON"
+  },
+  {
+   "id": "20215",
+   "name": "MORMON LAKE"
+  },
+  {
+   "id": "20219",
+   "name": "OAK CREEK"
+  },
+  {
+   "id": "20221",
+   "name": "PROMONTORY"
+  },
+  {
+   "id": "20610",
+   "name": "RED LAKE"
+  },
+  {
+   "id": "20611",
+   "name": "SHADOW RIM"
+  }
+ ],
+ "SW06N": [
+  {
+   "id": "20906",
+   "name": "CASA GRANDE"
+  },
+  {
+   "id": "20601",
+   "name": "GLOBE"
+  },
+  {
+   "id": "21505",
+   "name": "GOLDFIELD"
+  },
+  {
+   "id": "20609",
+   "name": "HILLTOP"
+  },
+  {
+   "id": "20602",
+   "name": "PAYSON"
+  },
+  {
+   "id": "20612",
+   "name": "PINE"
+  },
+  {
+   "id": "20603",
+   "name": "PLEASANT VALLEY"
+  },
+  {
+   "id": "20608",
+   "name": "SAN CARLOS #1"
+  },
+  {
+   "id": "20606",
+   "name": "TONTO BASIN"
+  },
+  {
+   "id": "20503",
+   "name": "VERDE"
+  }
+ ],
+ "SW06S": [
+  {
+   "id": "21008",
+   "name": "BLACK HILLS"
+  },
+  {
+   "id": "21303",
+   "name": "CANELO"
+  },
+  {
+   "id": "21411",
+   "name": "CARR"
+  },
+  {
+   "id": "21005",
+   "name": "COLUMBINE"
+  },
+  {
+   "id": "21009",
+   "name": "DRY LAKE"
+  },
+  {
+   "id": "21205",
+   "name": "EMPIRE"
+  },
+  {
+   "id": "21104",
+   "name": "GUTHRIE"
+  },
+  {
+   "id": "21409",
+   "name": "HEADQUARTERS"
+  },
+  {
+   "id": "21302",
+   "name": "HOPKINS"
+  },
+  {
+   "id": "20903",
+   "name": "HORSE CAMP CANYON"
+  },
+  {
+   "id": "21007",
+   "name": "MULESHOE RANCH"
+  },
+  {
+   "id": "21010",
+   "name": "NOON CREEK"
+  },
+  {
+   "id": "21207",
+   "name": "RINCON"
+  },
+  {
+   "id": "21414",
+   "name": "RUCKER"
+  },
+  {
+   "id": "21202",
+   "name": "SAGUARO"
+  },
+  {
+   "id": "21206",
+   "name": "SASABE"
+  },
+  {
+   "id": "21208",
+   "name": "SCOUT CAMP"
+  }
+ ],
+ "SW07": [
+  {
+   "id": "290305",
+   "name": "BLACK MESA"
+  },
+  {
+   "id": "293303",
+   "name": "BLUEWATER RIDGE"
+  },
+  {
+   "id": "291301",
+   "name": "BRUSHY MOUNTAIN"
+  },
+  {
+   "id": "290202",
+   "name": "COYOTE"
+  },
+  {
+   "id": "290705",
+   "name": "CUBA"
+  },
+  {
+   "id": "290203",
+   "name": "DEADMAN PEAK"
+  },
+  {
+   "id": "290205",
+   "name": "DULCE #2"
+  },
+  {
+   "id": "291302",
+   "name": "GRANTS"
+  },
+  {
+   "id": "290204",
+   "name": "JARITA MESA"
+  },
+  {
+   "id": "290702",
+   "name": "JEMEZ"
+  },
+  {
+   "id": "293304",
+   "name": "LAGUNA"
+  },
+  {
+   "id": "293301",
+   "name": "MALPAIS LAVA FLOW"
+  },
+  {
+   "id": "293305",
+   "name": "RAMAH"
+  },
+  {
+   "id": "290201",
+   "name": "STONE LAKE"
+  },
+  {
+   "id": "290801",
+   "name": "TOWER"
+  },
+  {
+   "id": "290307",
+   "name": "WILD RIVERS"
+  }
+ ],
+ "SW08": [
+  {
+   "id": "20401",
+   "name": "ALPINE"
+  },
+  {
+   "id": "20404",
+   "name": "GREER"
+  },
+  {
+   "id": "20303",
+   "name": "LAKESIDE"
+  },
+  {
+   "id": "20310",
+   "name": "MOUNTAIN LION"
+  },
+  {
+   "id": "21106",
+   "name": "STRAY HORSE"
+  },
+  {
+   "id": "21105",
+   "name": "TRAIL CABIN"
+  },
+  {
+   "id": "292001",
+   "name": "BEAVERHEAD"
+  },
+  {
+   "id": "292504",
+   "name": "BURRO MOUNTAIN"
+  },
+  {
+   "id": "292012",
+   "name": "DATIL"
+  },
+  {
+   "id": "292011",
+   "name": "GILA CENTER RAWS"
+  },
+  {
+   "id": "292004",
+   "name": "LUNA"
+  },
+  {
+   "id": "292104",
+   "name": "MAGDALENA"
+  },
+  {
+   "id": "292013",
+   "name": "MOGOLLON"
+  },
+  {
+   "id": "292009",
+   "name": "PELONA MOUNTAIN"
+  },
+  {
+   "id": "292005",
+   "name": "RESERVE"
+  },
+  {
+   "id": "292008",
+   "name": "SLAUGHTER"
+  }
+ ],
+ "SW09": [
+  {
+   "id": "292103",
+   "name": "BOSQUE"
+  },
+  {
+   "id": "292903",
+   "name": "DRIPPING SPRINGS"
+  },
+  {
+   "id": "292702",
+   "name": "HACHITA VALLEY"
+  },
+  {
+   "id": "292904",
+   "name": "SAN ANDRES"
+  },
+  {
+   "id": "290706",
+   "name": "SANDIA LAKES"
+  },
+  {
+   "id": "292105",
+   "name": "SEVILLETA"
+  }
+ ],
+ "SW10": [
+  {
+   "id": "291002",
+   "name": "BARTLEY"
+  },
+  {
+   "id": "290401",
+   "name": "CIMARRON"
+  },
+  {
+   "id": "291202",
+   "name": "PECOS"
+  },
+  {
+   "id": "290901",
+   "name": "SANTA FE WATERSHED"
+  },
+  {
+   "id": "290210",
+   "name": "TRUCHAS"
+  }
+ ],
+ "SW11": [
+  {
+   "id": "292102",
+   "name": "CHUPADERA"
+  },
+  {
+   "id": "291501",
+   "name": "MOUNTAINAIR"
+  },
+  {
+   "id": "291402",
+   "name": "OAK FLATS"
+  },
+  {
+   "id": "291408",
+   "name": "SANDIA LAB"
+  }
+ ],
+ "SW12": [
+  {
+   "id": "293004",
+   "name": "COSMIC"
+  },
+  {
+   "id": "292302",
+   "name": "DUNKEN"
+  },
+  {
+   "id": "293002",
+   "name": "MAYHILL"
+  },
+  {
+   "id": "292901",
+   "name": "MCGREGGOR RANGE"
+  },
+  {
+   "id": "293003",
+   "name": "MESCAL"
+  },
+  {
+   "id": "293105",
+   "name": "QUEEN"
+  },
+  {
+   "id": "292203",
+   "name": "SMOKEY BEAR"
+  },
+  {
+   "id": "55522253",
+   "name": "DOG CANYON"
+  },
+  {
+   "id": "417105",
+   "name": "PX WELL"
+  },
+  {
+   "id": "417103",
+   "name": "THE BOWL"
+  }
+ ],
+ "SW13": [
+  {
+   "id": "291901",
+   "name": "MELROSE RANGE"
+  },
+  {
+   "id": "291101",
+   "name": "MILLS CANYON"
+  },
+  {
+   "id": "418801",
+   "name": "BOOTLEG"
+  },
+  {
+   "id": "418901",
+   "name": "CAPROCK"
+  },
+  {
+   "id": "418701",
+   "name": "CEDAR"
+  },
+  {
+   "id": "418802",
+   "name": "WHEELER RAWS"
+  }
+ ],
+ "SW14N": [
+  {
+   "id": "293104",
+   "name": "CAPROCK"
+  },
+  {
+   "id": "292301",
+   "name": "EIGHT MILE DRAW"
+  },
+  {
+   "id": "293202",
+   "name": "PADUCA"
+  },
+  {
+   "id": "419202",
+   "name": "MIDLAND"
+  }
+ ],
+ "SW14S": [
+  {
+   "id": "293101",
+   "name": "BATDRAW"
+  },
+  {
+   "id": "55522216",
+   "name": "BIBE RGV"
+  },
+  {
+   "id": "417403",
+   "name": "CHISOS BASIN"
+  },
+  {
+   "id": "417404",
+   "name": "ELEPHANT MTN WMA RAWS"
+  },
+  {
+   "id": "417201",
+   "name": "FORT DAVIS"
+  },
+  {
+   "id": "417401",
+   "name": "PANTHER JUNCTION"
+  },
+  {
+   "id": "417101",
+   "name": "PINERY"
+  },
+  {
+   "id": "417202",
+   "name": "WOLF DEN DMP"
+  }
+ ]
+}
