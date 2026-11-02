@@ -1,5 +1,5 @@
 {
-  "_note": "Edit these to match SWCC operational thresholds. ERC breakpoints: SWCC 2015-2024 (Fuel Model Y), for use CY2025. SW14S is from the older WFAS chart (50/90/97 only) - verify. peak_tmax_f / hot_day_f are null until set; the defaults below apply. erc_smoothing_days: set to 2 to match SWCC's 2-day moving average ERC charts. BI percentiles and hot-day / much-above-peak temperatures come from config/fems_climo.json, which the Climatology workflow builds automatically. fires_raise counts active wildfires of fires_min_acres or more from NIFC WFIGS.",
+  "_note": "Edit these to match SWCC operational thresholds. ERC breakpoints: SWCC 2015-2024 (Fuel Model Y), for use CY2025, current 15 PSAs. peak_tmax_f / hot_day_f are null until set; the defaults below apply. erc_smoothing_days: set to 2 to match SWCC's 2-day moving average ERC charts. BI percentiles and hot-day / much-above-peak temperatures come from config/fems_climo.json, which the Climatology workflow builds automatically. fires_raise counts active wildfires of fires_min_acres or more from NIFC WFIGS.",
   "erc_low_pct": 60,
   "erc_mod_pct": 90,
   "erc_smoothing_days": 1,
@@ -35,7 +35,6 @@
     "SW11": {"erc": [40, 44, 48, 50, 52, 55, 59, 64, 67], "hot_day_f": null, "peak_tmax_f": null},
     "SW12": {"erc": [33, 37, 41, 43, 45, 47, 50, 55, 58], "hot_day_f": null, "peak_tmax_f": null},
     "SW13": {"erc": [37, 41, 44, 46, 48, 50, 53, 57, 60], "hot_day_f": null, "peak_tmax_f": null},
-    "SW14N": {"erc": [43, 46, 50, 52, 54, 56, 60, 66, 69], "hot_day_f": null, "peak_tmax_f": null},
-    "SW14S": {"erc": [64, null, null, null, null, null, 84, null, 93], "hot_day_f": null, "peak_tmax_f": null}
+    "SW14N": {"erc": [43, 46, 50, 52, 54, 56, 60, 66, 69], "hot_day_f": null, "peak_tmax_f": null}
   }
 }
