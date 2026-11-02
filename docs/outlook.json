@@ -1,0 +1,872 @@
+{
+ "run": {
+  "created": "2026-11-02T18:55Z",
+  "models": [],
+  "method": "Median of available models per PSA-day; spread = model min/max."
+ },
+ "days": [
+  "2026-11-02",
+  "2026-11-03",
+  "2026-11-04",
+  "2026-11-05",
+  "2026-11-06",
+  "2026-11-07",
+  "2026-11-08"
+ ],
+ "outlook": {
+  "SW01": [
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   }
+  ],
+  "SW02": [
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   }
+  ],
+  "SW03": [
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   }
+  ],
+  "SW04": [
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   }
+  ],
+  "SW05": [
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   }
+  ],
+  "SW06N": [
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   }
+  ],
+  "SW06S": [
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   }
+  ],
+  "SW07": [
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   }
+  ],
+  "SW08": [
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   }
+  ],
+  "SW09": [
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   }
+  ],
+  "SW10": [
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   }
+  ],
+  "SW11": [
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   }
+  ],
+  "SW12": [
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   }
+  ],
+  "SW13": [
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   }
+  ],
+  "SW14N": [
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   }
+  ],
+  "SW14S": [
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   },
+   {
+    "category": "nodata",
+    "trigger": null,
+    "why": [
+     "No ERC for this PSA-day."
+    ]
+   }
+  ]
+ },
+ "discussion": "",
+ "auto_discussion": [
+  "**Headline:** Waiting on FEMS fuels data; no PSA can be rated yet.",
+  "**Fuels:** No FEMS NFDRS data was available for this run, so PSAs show no data."
+ ],
+ "fires": [],
+ "thresholds": {
+  "erc_low_pct": 60,
+  "erc_mod_pct": 90,
+  "erc_smoothing_days": 1,
+  "wetting_rain_in": 0.25,
+  "light_rain_in": 0.1,
+  "bi_raise_pct": 90,
+  "hdwi_raise": 250,
+  "fires_raise": 3,
+  "fires_min_acres": 100,
+  "wind_sustained_mph": 20,
+  "wind_gust_mph": 35,
+  "wind_rh_max": 15,
+  "lightning_coverage_pct": 25,
+  "lightning_rh_below": 20,
+  "lightning_hot_days": 2,
+  "burn_rh_max": 15,
+  "burn_lapse_c_km": 7.5,
+  "hot_day_default_f": 90,
+  "much_above_peak_default_f": 100,
+  "erc_percentiles": [
+   50,
+   60,
+   70,
+   75,
+   80,
+   85,
+   90,
+   95,
+   97
+  ]
+ }
+}
