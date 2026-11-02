@@ -517,6 +517,10 @@
    "name": "DOG CANYON"
   },
   {
+   "id": "417101",
+   "name": "PINERY"
+  },
+  {
    "id": "417105",
    "name": "PX WELL"
   },
@@ -533,25 +537,13 @@
   {
    "id": "291101",
    "name": "MILLS CANYON"
-  },
-  {
-   "id": "418801",
-   "name": "BOOTLEG"
-  },
-  {
-   "id": "418901",
-   "name": "CAPROCK"
-  },
-  {
-   "id": "418701",
-   "name": "CEDAR"
-  },
-  {
-   "id": "418802",
-   "name": "WHEELER RAWS"
   }
  ],
  "SW14N": [
+  {
+   "id": "293101",
+   "name": "BATDRAW"
+  },
   {
    "id": "293104",
    "name": "CAPROCK"
@@ -563,44 +555,7 @@
   {
    "id": "293202",
    "name": "PADUCA"
-  },
-  {
-   "id": "419202",
-   "name": "MIDLAND"
   }
  ],
- "SW14S": [
-  {
-   "id": "293101",
-   "name": "BATDRAW"
-  },
-  {
-   "id": "55522216",
-   "name": "BIBE RGV"
-  },
-  {
-   "id": "417403",
-   "name": "CHISOS BASIN"
-  },
-  {
-   "id": "417404",
-   "name": "ELEPHANT MTN WMA RAWS"
-  },
-  {
-   "id": "417201",
-   "name": "FORT DAVIS"
-  },
-  {
-   "id": "417401",
-   "name": "PANTHER JUNCTION"
-  },
-  {
-   "id": "417101",
-   "name": "PINERY"
-  },
-  {
-   "id": "417202",
-   "name": "WOLF DEN DMP"
-  }
- ]
+ "_psa_hash": "25463453f1ce"
 }
