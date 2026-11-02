@@ -45,7 +45,7 @@ MST = timezone(timedelta(hours=-7))
 AFTERNOON = range(11, 19)
 SW_BBOX = (-115.5, -102.5, 30.5, 37.8)
 SW_PSAS = ["SW01", "SW02", "SW03", "SW04", "SW05", "SW06N", "SW06S", "SW07",
-           "SW08", "SW09", "SW10", "SW11", "SW12", "SW13", "SW14N", "SW14S"]
+           "SW08", "SW09", "SW10", "SW11", "SW12", "SW13", "SW14N"]   # current (2025) Southwest PSAs
 FIELDS = ["wind", "gust", "minrh", "tmax", "qpf", "thunder", "lapse", "hdwi"]
 
 GRIB = {
@@ -69,7 +69,6 @@ MODELS = {
     "HRRR":    (dict(model="hrrr", product="sfc"), list(range(0, 49)), GRIB, 1),
     "RAP":     (dict(model="rap", product="awp130pgrb"), list(range(0, 52, 3)), GRIB, 1),
     "NAMNEST": (dict(model="nam", product="conusnest.hiresf"), H3, GRIB, 6),
-    "RRFS":    (dict(model="rrfs", product="prslev", domain="conus", member="control"), H3, GRIB, 6),
     "NBM":     (dict(model="nbm", product="co"), list(range(1, 37)) + list(range(39, 169, 3)), NBM, 1),
     "GFS":     (dict(model="gfs", product="pgrb2.0p25"), list(range(0, 121, 3)) + list(range(126, 181, 6)), GRIB, 6),
     "GEFS":    (dict(model="gefs", product="atmos.5", member="mean"), list(range(0, 181, 6)), GRIB, 6),
@@ -82,8 +81,14 @@ GRID_MODELS = ("NBM", "GFS")      # these also save daily gridded fields for the
 
 # ------------------------------------------------------------------ PSAs
 NWCG_PSP = "https://fsapps.nwcg.gov/psp/arcgis/rest/services/npsg/PSA_GACC_KeyRAWS/MapServer"
+NWCG_NPSG = "https://fsapps.nwcg.gov/psp/arcgis/rest/services/npsg"
 PSA_SOURCES = [
-    # NWCG Predictive Services public map service (layer 1 = PSA boundaries), queried by map area
+    # Current PSAs as drawn on the official NWCG 7-Day Significant Fire Potential map (Day 1 layer)
+    ("query", NWCG_NPSG + "/outlooks_forecast/MapServer/0/query"),
+    # Current PSAs from the NWCG monthly/extended outlook service
+    ("query", NWCG_NPSG + "/Outlooks_Monthly_Extended/FeatureServer/0/query"),
+    ("query", NWCG_NPSG + "/Outlooks_Monthly_Extended/MapServer/0/query"),
+    # Older PSA layer (pre-2025 boundaries) - last resort only
     ("query", NWCG_PSP + "/1/query"),
     # NIFC feature service (may require a token) and Open Data downloads as fallbacks
     ("query", "https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services/National_PSA_Current/FeatureServer/0/query"),
@@ -128,7 +133,8 @@ def cmd_fetch_psa(a):
             if not feats:
                 tried.append(f"{url[:100]} -> {txt[:300]}")
                 continue
-            if any(_psa_code(f.get("properties") or {}) for f in feats):
+            codes = {_psa_code(f.get("properties") or {}) for f in feats} - {None}
+            if len(codes) >= 10:
                 gj = js
                 print(f"PSA boundaries from {url[:100]}")
                 break
@@ -204,7 +210,7 @@ def vpd_hpa(t_k, rh):
 # Which cycles to use: (every N hours, first cycle hour, hours after cycle before it is usually posted).
 # HRRR 00/06/12/18Z and RAP 03/09/15/21Z run long (48-51 h); NBM 01/07/13/19Z are the full runs;
 # ECMWF open data 06/18Z stop at day 4, so IFS/AIFS use 00/12Z.
-CYCLES = {"HRRR": (6, 0, 2), "RAP": (6, 3, 2), "NBM": (6, 1, 2), "NAMNEST": (6, 0, 4), "RRFS": (6, 0, 4),
+CYCLES = {"HRRR": (6, 0, 2), "RAP": (6, 3, 2), "NBM": (6, 1, 2), "NAMNEST": (6, 0, 4),
           "GFS": (6, 0, 5), "GEFS": (6, 0, 6), "IFS": (12, 0, 6), "AIFS": (12, 0, 6)}
 
 
@@ -636,7 +642,7 @@ def auto_discussion(days, psas, out, fires=None, cfg=None):
 FEMS_GQL = "https://fems.fs2c.usda.gov/api/climatology/graphql"
 FEMS_DL = "https://fems.fs2c.usda.gov/api/ext-climatology/"
 FEMS_NFDR_PATHS = ["download-nfdr-daily-summary/", "download-nfdr-dailysummary/"]
-FEMS_STATES = ["AZ", "NM", "TX"]          # TX covers the far west Texas edge of SW14S
+FEMS_STATES = ["AZ", "NM", "TX"]          # TX catches stations right along the NM border
 # Output names, the header names FEMS uses (normalized), and the column position as a fallback.
 FEMS_COLS = {
     "fm1": (["1hrfm"], 4), "fm10": (["10hrfm"], 6), "fm100": (["100hrfm"], 8), "fm1000": (["1000hrfm"], 10),
@@ -733,58 +739,64 @@ def fems_download(station_ids, start, end, dataset="all", fuel="Y"):
     return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
 
 
-def nwcg_key_raws():
-    """SWCC key RAWS per PSA from the NWCG Predictive Services map service (layer 2)."""
+def psa_hash(path):
+    import hashlib
+    return hashlib.md5(open(path, "rb").read()).hexdigest()[:12] if os.path.exists(path) else ""
+
+
+def nwcg_key_raws(psa_path):
+    """Key RAWS from the NWCG map service, assigned to the current PSAs by location (fallback station list)."""
+    import shapely
     lon0, lon1, lat0, lat1 = SW_BBOX
-    q = urllib.parse.urlencode({"where": "1=1", "outFields": "*", "f": "json", "returnGeometry": "false",
+    q = urllib.parse.urlencode({"where": "1=1", "outFields": "*", "f": "json", "returnGeometry": "true", "outSR": 4326,
                                 "geometry": f"{lon0},{lat0},{lon1},{lat1}", "geometryType": "esriGeometryEnvelope",
                                 "inSR": 4326, "spatialRel": "esriSpatialRelIntersects"})
     js = json.loads(_http(f"{NWCG_PSP}/2/query?{q}"))
+    psas = load_psas(psa_path)
     out = {}
     for f in js.get("features", []):
-        at = f.get("attributes") or {}
-        psa = _psa_code(at)
-        sid = None
-        for k, v in at.items():
-            if any(t in k.lower() for t in ("wims", "station_id", "stationid", "nfdrs", "raws_id", "sta_id")):
-                if re.fullmatch(r"\d{5,6}", str(v).strip().split(".")[0]):
-                    sid = str(v).strip().split(".")[0]
-                    break
-        if psa and sid:
+        at, geo = f.get("attributes") or {}, f.get("geometry") or {}
+        sid = next((str(v).strip().split(".")[0] for k, v in at.items()
+                    if any(t in k.lower() for t in ("wims", "station_id", "stationid", "nfdrs", "raws_id", "sta_id"))
+                    and re.fullmatch(r"\d{5,6}", str(v).strip().split(".")[0])), None)
+        if not sid or "x" not in geo:
+            continue
+        psa = next((p for p, g in psas.items() if shapely.contains_xy(g, geo["x"], geo["y"])), None)
+        if psa:
             out.setdefault(psa, []).append({"id": sid, "name": next((str(v) for k, v in at.items() if "name" in k.lower() and v), None)})
     return out
 
 
 def load_station_map(a):
-    """config/stations.json (your SIG lists) wins; then SWCC key RAWS from NWCG; then every station found in the PSA."""
+    """Every NFDRS station inside each PSA (config/stations.json can override a PSA).
+    The list is cached in docs/fems_stations.json and rebuilt when the PSA boundaries change."""
     manual = json.load(open(a.stations)) if os.path.exists(a.stations) else {}
     manual = {k: v for k, v in manual.items() if not k.startswith("_") and v}
+    h = psa_hash(a.psa)
     auto = {}
-    if len(manual) < len(SW_PSAS):
-        if os.path.exists(a.discovered) and not getattr(a, "rediscover", False):
-            auto = json.load(open(a.discovered))
-        else:
-            key = {}
+    if os.path.exists(a.discovered) and not getattr(a, "rediscover", False):
+        cached = json.load(open(a.discovered))
+        if cached.get("_psa_hash") == h:
+            auto = cached
+    if not auto and len(manual) < len(SW_PSAS):
+        found = {}
+        try:
+            found = fems_discover_stations(a.psa)
+            print(f"FEMS station search: {sum(len(v) for v in found.values())} stations")
+        except Exception as e:
+            print(f"FEMS station search failed ({e}); trying NWCG key RAWS")
+        if sum(len(v) for v in found.values()) == 0:
             try:
-                key = nwcg_key_raws()
-                print(f"NWCG key RAWS: {sum(len(v) for v in key.values())} stations in {len(key)} PSAs")
+                found = nwcg_key_raws(a.psa)
+                print(f"NWCG key RAWS: {sum(len(v) for v in found.values())} stations")
             except Exception as e:
                 print(f"NWCG key RAWS unavailable ({e})")
-            found = {}
-            if len(key) < len(SW_PSAS):
-                try:
-                    found = fems_discover_stations(a.psa)
-                except Exception as e:
-                    print(f"FEMS station search failed ({e})")
-            auto = {p: key.get(p) or found.get(p, []) for p in SW_PSAS}
-            json.dump(auto, open(a.discovered, "w"), indent=1)
-            print(f"Station list: {sum(len(v) for v in auto.values())} stations -> {a.discovered}")
+        auto = {p: found.get(p, []) for p in SW_PSAS}
+        auto["_psa_hash"] = h
+        json.dump(auto, open(a.discovered, "w"), indent=1)
     smap = {}
     for p in SW_PSAS:
-        if p in manual:
-            smap[p] = [str(s) for s in manual[p]]
-        else:
-            smap[p] = [s["id"] for s in auto.get(p, [])]
+        smap[p] = [str(x) for x in manual[p]] if p in manual else [x["id"] for x in auto.get(p, [])]
     return smap
 
 
@@ -877,6 +889,22 @@ def fems_tmax(station_ids, start, end):
     return pd.concat(series, axis=1).mean(axis=1).dropna()
 
 
+def doy_normals(daily, window=15):
+    """Average value for each calendar day (1-366), smoothed with a centered 15-day window, for every FEMS field."""
+    d = daily.copy()
+    d["doy"] = pd.to_datetime(d["date"]).dt.dayofyear
+    out = {}
+    for f in FEMS_FIELDS:
+        if f not in d or d[f].notna().sum() < 300:
+            continue
+        m = d.groupby("doy")[f].mean().reindex(range(1, 367))
+        m = m.interpolate(limit_direction="both")
+        wrap = pd.concat([m.iloc[-window:], m, m.iloc[:window]])          # wrap Dec/Jan
+        sm = wrap.rolling(window, center=True, min_periods=1).mean().iloc[window:-window]
+        out[f] = [round(float(v), 2 if f == "gsi" else 1) for v in sm.values]
+    return out
+
+
 def cmd_fems_climo(a):
     """Build BI and ERC percentile breakpoints for each PSA from FEMS history (run once a year)."""
     smap = load_station_map(a)
@@ -893,10 +921,12 @@ def cmd_fems_climo(a):
         if df.empty:
             continue
         daily = psa_daily(df, {p: ids})
+        normals = doy_normals(daily)
         daily = daily[pd.to_datetime(daily.date).dt.month.isin(months)]
         out[p] = {k: {str(q): round(float(np.nanpercentile(daily[k].dropna(), q)), 1) for q in pcts}
                   for k in ("bi", "erc") if daily[k].notna().sum() > 30}
         out[p]["days"] = int(len(daily))
+        out[p]["normals"] = normals
         try:
             t = fems_tmax(ids, start, end)
             t = t[pd.to_datetime(t.index).month.isin([5, 6, 7])]          # peak fire season May-Jul
@@ -907,7 +937,8 @@ def cmd_fems_climo(a):
         except Exception as e:
             print(f"  {p} temperatures skipped: {e}")
     out["created"] = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    json.dump(out, open(a.out, "w"), indent=1)
+    out["psa_hash"] = psa_hash(a.psa)
+    json.dump(out, open(a.out, "w"), separators=(",", ":"))
     print(f"Wrote {a.out}")
 
 
@@ -1199,6 +1230,12 @@ def cmd_blend(a):
                         psas[p][f][days.index(d)] = float(row[f])
                         if f == "erc":
                             psas[p]["source"][days.index(d)] = "manual"
+
+    # FEMS normals for each PSA-day (average of all stations in the PSA, same calendar day, last 10 years)
+    for p in SW_PSAS:
+        nm = (climo.get(p) or {}).get("normals") or {}
+        psas[p]["normal"] = {f: [nm[f][datetime.fromisoformat(d).timetuple().tm_yday - 1] for d in days]
+                             for f in FEMS_FIELDS if f in nm}
 
     # Fires on the ground (WFIGS), same count every day unless data/fuels.csv sets one
     fires = json.load(open(a.fires)) if os.path.exists(a.fires) else None
