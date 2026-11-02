@@ -2,8 +2,9 @@ name: Forecast
 
 on:
   schedule:
-    - cron: "40 13 * * *"    # 6:40 am MST, after the 06Z global / 12Z hourly runs
-    - cron: "40 19 * * *"    # 12:40 pm MST, picks up 12Z GFS/IFS
+    # GitHub schedules are in UTC and do not follow daylight saving.
+    - cron: "45 12 * * *"    # 5:45 am MST (6:45 am MDT): 06Z GFS/GEFS/NAM, 00Z ECMWF, latest hourly models, FEMS
+    - cron: "30 6 * * *"     # 11:30 pm MST (12:30 am MDT): 00Z HRRR/NAM/RRFS/GFS/GEFS, ECMWF 00Z if posted (else 12Z), today's 1300 FEMS obs + new NFDRS forecast
   workflow_dispatch:
     inputs:
       models:
