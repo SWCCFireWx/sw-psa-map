@@ -1,0 +1,39 @@
+name: Climatology
+
+# Builds BI (and ERC) percentile breakpoints for each PSA from FEMS history.
+# Run it once now and again each year; it commits config/fems_climo.json,
+# which re-colors the map through the Forecast workflow.
+on:
+  workflow_dispatch:
+    inputs:
+      start_year: { description: "First year", default: "2015" }
+      end_year:   { description: "Last year",  default: "2024" }
+      start_month: { description: "First month of season (1 = all year)", default: "1" }
+      end_month:   { description: "Last month of season (12 = all year)", default: "12" }
+
+permissions:
+  contents: write
+
+jobs:
+  climo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install pandas numpy shapely
+      - name: Download PSA boundaries if missing
+        run: if [ ! -s docs/psa.geojson ]; then python scripts/psa_pipeline.py fetch-psa; fi
+      - name: Build percentiles from FEMS
+        run: >
+          python scripts/psa_pipeline.py fems-climo
+          --start-year ${{ inputs.start_year }} --end-year ${{ inputs.end_year }}
+          --start-month ${{ inputs.start_month }} --end-month ${{ inputs.end_month }}
+      - name: Commit
+        run: |
+          git config user.name "psa-forecast-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add config/fems_climo.json docs/psa.geojson docs/fems_stations.json
+          git diff --cached --quiet || git commit -m "FEMS climatology ${{ inputs.start_year }}-${{ inputs.end_year }}"
+          git pull --rebase -q && git push
