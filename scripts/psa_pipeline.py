@@ -46,7 +46,8 @@ AFTERNOON = range(11, 19)
 SW_BBOX = (-115.5, -102.5, 30.5, 37.8)
 SW_PSAS = ["SW01", "SW02", "SW03", "SW04", "SW05", "SW06N", "SW06S", "SW07",
            "SW08", "SW09", "SW10", "SW11", "SW12", "SW13", "SW14N"]   # current (2025) Southwest PSAs
-FIELDS = ["wind", "gust", "minrh", "tmax", "qpf", "thunder", "lapse", "hdwi"]
+FIELDS = ["wind", "gust", "minrh", "tmax", "qpf", "thunder", "lapse", "hdwi",
+          "pwat", "cbase", "dcape", "motion", "dlp_mod", "dlp_high"]
 
 GRIB = {
     "t2": r":TMP:2 m above ground", "rh2": r":RH:2 m above ground", "d2": r":DPT:2 m above ground",
@@ -236,6 +237,191 @@ def pick_init(name, kw, hours, days, first):
     return first
 
 
+# ------------------------------------------------------------------ dry lightning potential
+# Extra fields pulled for afternoon steps only.
+DLP_GRIB = {
+    "pwat": r":PWAT:entire atmosphere", "psfc": r":PRES:surface:",
+    "t850": r":TMP:850 mb", "t600": r":TMP:600 mb",
+    "rh850": r":RH:850 mb", "rh700": r":RH:700 mb", "rh600": r":RH:600 mb", "rh500": r":RH:500 mb",
+    "td850": r":DPT:850 mb", "td700": r":DPT:700 mb", "td600": r":DPT:600 mb", "td500": r":DPT:500 mb",
+    "u700": r":UGRD:700 mb", "v700": r":VGRD:700 mb", "u500": r":UGRD:500 mb", "v500": r":VGRD:500 mb",
+    "u300": r":UGRD:300 mb", "v300": r":VGRD:300 mb", "u250": r":UGRD:250 mb", "v250": r":VGRD:250 mb",
+}
+DLP_ECMWF = {
+    "pwat": ":tcwv:", "psfc": ":sp:", "t850": ":t:850:", "t600": ":t:600:",
+    "rh850": ":r:850:", "rh700": ":r:700:", "rh600": ":r:600:", "rh500": ":r:500:",
+    "q850": ":q:850:", "q700": ":q:700:", "q600": ":q:600:", "q500": ":q:500:",
+    "u700": ":u:700:", "v700": ":v:700:", "u500": ":u:500:", "v500": ":v:500:", "u300": ":u:300:", "v300": ":v:300:",
+}
+DLP_MODELS = {"HRRR": DLP_GRIB, "RAP": DLP_GRIB, "NAMNEST": DLP_GRIB, "GFS": DLP_GRIB, "IFS": DLP_ECMWF, "AIFS": DLP_ECMWF}
+DLP_DEFAULTS = {"dlp_cape": 150, "dlp_pwat_dry_in": 0.60, "dlp_pwat_in": 0.80, "dlp_base_high_ft": 10000,
+                "dlp_base_ft": 8000, "dlp_dcape_high": 1200, "dlp_dcape": 800, "dlp_motion_fast_kt": 20,
+                "dlp_motion_kt": 15, "dlp_area_pct": 15, "dlp_low_area_pct": 5}
+RD, CPD, LV, EPS = 287.04, 1004.0, 2.5e6, 0.622
+
+
+def _es(tc):
+    return 6.112 * np.exp(17.67 * tc / (tc + 243.5))
+
+
+def _td_from_rh(tk, rh):
+    e = _es(tk - 273.15) * np.clip(rh, 1, 100) / 100
+    ln = np.log(e / 6.112)
+    return 243.5 * ln / (17.67 - ln) + 273.15
+
+
+def _td_from_q(q, p):
+    e = np.clip(q, 1e-6, None) * p / (EPS + q * (1 - EPS))
+    ln = np.log(e / 6.112)
+    return 243.5 * ln / (17.67 - ln) + 273.15
+
+
+def _moist_dtdp(t, p):
+    """Pseudo-adiabatic dT/dp (K per hPa)."""
+    es = _es(t - 273.15)
+    rs = EPS * es / np.clip(p - es, 1, None)
+    return (RD * t + LV * rs) / (p * (CPD + LV * LV * rs * EPS / (RD * t * t)))
+
+
+def _moist_descend(t, p0, p1, n):
+    """Follow a saturated parcel from p0 down to p1 (p1 > p0) in n RK2 steps."""
+    dp = (p1 - p0) / n
+    p = p0.copy()
+    for _ in range(n):
+        k1 = _moist_dtdp(t, p)
+        k2 = _moist_dtdp(t + k1 * dp, p + dp)
+        t = t + 0.5 * (k1 + k2) * dp
+        p = p + dp
+    return t
+
+
+def dcape(levels, psfc, t2, td2):
+    """Downdraft CAPE (J/kg). levels: {p_hPa: (T_K, Td_K)} for isobaric levels; vectorized over the grid.
+    Source = level of minimum theta-e between 700 and 500 mb; parcel cooled to its wet-bulb temperature,
+    then descends moist-adiabatically to the surface."""
+    plist = sorted(levels)
+    src = [pp for pp in plist if 500 <= pp <= 700]
+    if not src:
+        return None
+    best_te, sp, st, std = None, None, None, None
+    for pp in src:
+        t, td = levels[pp]
+        r = EPS * _es(td - 273.15) / (pp - _es(td - 273.15))
+        te = t * (1000.0 / pp) ** 0.2857 * np.exp(LV * r / (CPD * t))
+        if best_te is None:
+            best_te, sp, st, std = te, np.full_like(t, pp), t, td
+        else:
+            m = te < best_te
+            best_te = np.where(m, te, best_te)
+            sp = np.where(m, pp, sp); st = np.where(m, t, st); std = np.where(m, td, std)
+    tl = 1.0 / (1.0 / (std - 56.0) + np.log(st / std) / 800.0) + 56.0          # Bolton LCL temperature
+    pl = sp * (tl / st) ** (CPD / RD)
+    tw = _moist_descend(tl, pl, sp, 8)                                          # wet-bulb at source level
+    # environment profile: isobaric levels above ground + surface
+    ps = [pp for pp in plist]
+    def env_t(p):
+        out = np.full_like(p, np.nan)
+        lo_p = np.full_like(p, np.nan); lo_t = np.full_like(p, np.nan)
+        hi_p = np.full_like(p, np.nan); hi_t = np.full_like(p, np.nan)
+        pts = [(np.full_like(p, pp), levels[pp][0]) for pp in ps] + [(psfc, t2)]
+        for pk, tk in pts:
+            valid = pk <= psfc + 0.5
+            m1 = valid & (pk <= p) & (np.isnan(lo_p) | (pk > lo_p))
+            lo_p = np.where(m1, pk, lo_p); lo_t = np.where(m1, tk, lo_t)
+            m2 = valid & (pk >= p) & (np.isnan(hi_p) | (pk < hi_p))
+            hi_p = np.where(m2, pk, hi_p); hi_t = np.where(m2, tk, hi_t)
+        w = np.where(hi_p > lo_p, np.log(p / lo_p) / np.log(hi_p / lo_p), 0.0)
+        out = lo_t + w * (hi_t - lo_t)
+        return np.where(np.isnan(out), np.where(np.isnan(lo_t), hi_t, lo_t), out)
+    n = 30
+    dp = (psfc - sp) / n
+    t, p, total = tw.copy(), sp.copy(), np.zeros_like(tw)
+    for _ in range(n):
+        k1 = _moist_dtdp(t, p)
+        k2 = _moist_dtdp(t + k1 * dp, p + dp)
+        tn, pn = t + 0.5 * (k1 + k2) * dp, p + dp
+        te = env_t(0.5 * (p + pn))
+        total += RD * np.clip(te - 0.5 * (t + tn), 0, None) * np.log(pn / p)
+        t, p = tn, pn
+    return np.where(psfc > sp + 20, total, 0.0)
+
+
+def dry_lightning(g, cfg, ecmwf=False):
+    """Per-gridpoint dry lightning ingredients and score from one afternoon model step.
+    Returns dict of arrays: pwat (in), cbase (ft AGL), dcape (J/kg), motion (kt), score (0-7, NaN where no storms)."""
+    c = {**DLP_DEFAULTS, **{k: v for k, v in (cfg or {}).items() if k.startswith("dlp_")}}
+    t2 = g.get("t2")
+    if t2 is None or g.get("cape") is None:
+        return None
+    td2 = g.get("d2")
+    if td2 is None and g.get("rh2") is not None:
+        td2 = _td_from_rh(t2, g["rh2"])
+    if td2 is None:
+        return None
+    out = {}
+    out["cbase"] = np.clip(125.0 * (t2 - td2), 0, None) * 3.281                 # LCL height AGL, ft
+    if g.get("pwat") is not None:
+        out["pwat"] = g["pwat"] / 25.4                                            # kg/m2 = mm -> in
+    psfc = g.get("psfc")
+    if psfc is not None:
+        psfc = psfc / 100.0
+        levels = {}
+        for pp in (850, 700, 600, 500):
+            t = g.get(f"t{pp}")
+            if t is None:
+                continue
+            td = g.get(f"td{pp}")
+            if td is None and g.get(f"rh{pp}") is not None:
+                td = _td_from_rh(t, g[f"rh{pp}"])
+            if td is None and g.get(f"q{pp}") is not None:
+                td = _td_from_q(g[f"q{pp}"], pp)
+            if td is not None:
+                levels[pp] = (t, np.minimum(td, t))
+        if 700 in levels and 500 in levels:
+            out["dcape"] = dcape(levels, psfc, t2, np.minimum(td2, t2))
+    us = [(g.get(f"u{pp}"), g.get(f"v{pp}")) for pp in (700, 500, 300 if g.get("u300") is not None else 250)]
+    us = [(u, v) for u, v in us if u is not None and v is not None]
+    if len(us) >= 2:
+        out["motion"] = np.hypot(np.mean([u for u, _ in us], axis=0), np.mean([v for _, v in us], axis=0)) * 1.944
+    storms = g["cape"] >= c["dlp_cape"]
+    score = np.zeros_like(t2)
+    if "pwat" in out:
+        score += np.where(out["pwat"] <= c["dlp_pwat_dry_in"], 2, np.where(out["pwat"] <= c["dlp_pwat_in"], 1, 0))
+    score += np.where(out["cbase"] >= c["dlp_base_high_ft"], 2, np.where(out["cbase"] >= c["dlp_base_ft"], 1, 0))
+    if "dcape" in out:
+        score += np.where(out["dcape"] >= c["dlp_dcape_high"], 2, np.where(out["dcape"] >= c["dlp_dcape"], 1, 0))
+    if "motion" in out:
+        score += np.where(out["motion"] >= c["dlp_motion_fast_kt"], 1, np.where(out["motion"] >= c["dlp_motion_kt"], 0.5, 0))
+    out["score"] = np.where(storms, score, np.nan)
+    return out
+
+
+DLP_LEVELS = {0: "none", 1: "low", 2: "moderate", 3: "high"}
+
+
+def dlp_level(mod_pct, high_pct, cfg=None):
+    c = {**DLP_DEFAULTS, **{k: v for k, v in (cfg or {}).items() if k.startswith("dlp_")}}
+    if high_pct is not None and high_pct >= c["dlp_area_pct"]:
+        return 3
+    if mod_pct is not None and mod_pct >= c["dlp_area_pct"]:
+        return 2
+    if mod_pct is not None and mod_pct >= c["dlp_low_area_pct"]:
+        return 1
+    return 0
+
+
+def _dlp_psa(dl, mk):
+    """PSA summary of one step's dry lightning fields."""
+    if dl is None or mk is None or not mk.any():
+        return {}
+    sc = dl["score"][mk]
+    q = lambda k, f: None if k not in dl else float(f(dl[k][mk]))
+    return {"pwat": q("pwat", np.nanmedian), "cbase": q("cbase", np.nanmedian), "dcape": q("dcape", lambda x: np.nanpercentile(x, 90)),
+            "motion": q("motion", np.nanmedian),
+            "dlp_mod": float(np.mean(np.nan_to_num(sc, nan=0) >= 3) * 100),
+            "dlp_high": float(np.mean(np.nan_to_num(sc, nan=0) >= 5) * 100)}
+
+
 def cmd_model(a):
     from herbie import Herbie
     import shapely
@@ -247,11 +433,14 @@ def cmd_model(a):
     init = (datetime.strptime(a.init, "%Y-%m-%dT%H").replace(tzinfo=timezone.utc) if a.init
             else pick_init(name, kw, hours, days, latest_init(name, now)))
     psas = load_psas(a.psa)
-    print(f"[{name}] init {init:%Y-%m-%d %HZ}", flush=True)
+    cfg = json.load(open(a.config)) if os.path.exists(a.config) else {}
+    dlp_search = DLP_MODELS.get(name)
+    print(f"[{name}] init {init:%Y-%m-%d %HZ}" + (" (with dry lightning fields)" if dlp_search else ""), flush=True)
 
     masks, recs, cum, last_total = None, [], {}, None
     save_grids = name in GRID_MODELS
-    grid = {"box": None, "rh": {}, "gust": {}, "qpf": {}}
+    grid = {"box": None, "rh": {}, "gust": {}, "qpf": {}, "dlp": {}}
+    sub = None                                     # Southwest crop of the model grid
     for f in hours:
         valid = init + timedelta(hours=f)
         local = valid.astimezone(MST)
@@ -263,7 +452,10 @@ def cmd_model(a):
                 continue
         except Exception:
             continue
-        fld = {k: fetch_field(H, p) for k, p in search.items()}
+        want = dict(search)
+        if dlp_search and local.hour in AFTERNOON:
+            want.update(dlp_search)
+        fld = {k: fetch_field(H, p) for k, p in want.items()}
         base = next((v for v in fld.values() if v is not None), None)
         if base is None:
             continue
@@ -273,13 +465,14 @@ def cmd_model(a):
                 lon, lat = np.meshgrid(lon, lat)
             lon = np.where(lon > 180, lon - 360, lon)
             masks = {k: shapely.contains_xy(g, lon, lat) for k, g in psas.items()}
+            lo0, lo1, la0, la1 = SW_BBOX
+            inb = (lon >= lo0) & (lon <= lo1) & (lat >= la0) & (lat <= la1)
+            rr, cc = np.where(inb)
+            sub = (slice(rr.min(), rr.max() + 1), slice(cc.min(), cc.max() + 1))
+            step_px = max(1, int(round(max(np.ptp(rr), np.ptp(cc)) / 700)))         # keep maps under ~700 px across
             if save_grids:
-                lo0, lo1, la0, la1 = SW_BBOX
-                inb = (lon >= lo0) & (lon <= lo1) & (lat >= la0) & (lat <= la1)
-                rr, cc = np.where(inb)
-                step_px = max(1, int(round(max(np.ptp(rr), np.ptp(cc)) / 700)))     # keep maps under ~700 px across
                 sl = (slice(rr.min(), rr.max() + 1, step_px), slice(cc.min(), cc.max() + 1, step_px))
-                grid.update(box=sl, lat=lat[sl].astype("float32"), lon=lon[sl].astype("float32"))
+                grid.update(box=sl, sub_step=step_px, lat=lat[sl].astype("float32"), lon=lon[sl].astype("float32"))
         g = {k: (None if v is None else np.asarray(v.values, dtype=float)) for k, v in fld.items()}
 
         wspd = np.hypot(g["u10"], g["v10"]) if g.get("u10") is not None and g.get("v10") is not None else g.get("wspd")
@@ -291,6 +484,14 @@ def cmd_model(a):
             dz = (g["z500"] - g["z700"]) / 1000.0 if g.get("z700") is not None and g.get("z500") is not None else 2.7
             lapse = (g["t700"] - g["t500"]) / dz
         hdwi = vpd_hpa(g["t2"], rh) * wspd if g.get("t2") is not None and rh is not None and wspd is not None else None
+
+        dl = None
+        if dlp_search and local.hour in AFTERNOON and sub is not None:
+            try:
+                gs = {k: (None if v is None or np.ndim(v) != 2 else v[sub]) for k, v in g.items()}
+                dl = dry_lightning(gs, cfg, ecmwf=name in ("IFS", "AIFS"))
+            except Exception as e:
+                print(f"[{name}] dry lightning skipped at f{f:03d}: {e}", flush=True)
 
         step_precip = None
         if fld.get("apcp") is not None:
@@ -313,6 +514,10 @@ def cmd_model(a):
                     grid["gust"][dk] = np.fmax(grid["gust"].get(dk, -np.inf), gg[sl] * MS_TO_MPH)
             if step_precip is not None:
                 grid["qpf"][dk] = grid["qpf"].get(dk, 0) + np.clip(step_precip[sl], 0, None)
+            if dl is not None:
+                k = grid["sub_step"]
+                sc = np.nan_to_num(dl["score"][::k, ::k], nan=0.0)
+                grid["dlp"][dk] = np.fmax(grid["dlp"].get(dk, 0), sc)
 
         for psa, mk in masks.items():
             if not mk.any():
@@ -330,14 +535,20 @@ def cmd_model(a):
                 tmax=None if g.get("t2") is None else (q(g["t2"], 90) - 273.15) * 9 / 5 + 32,
                 qpf=None if step_precip is None else float(np.nanmedian(step_precip[mk])),
                 thunder=thunder, lapse=None if lapse is None else float(np.nanmean(lapse[mk])),
-                hdwi=q(hdwi, 90)))
+                hdwi=q(hdwi, 90), **_dlp_psa(dl, mk[sub] if dl is not None else None)))
     if not recs:
         sys.exit(f"[{name}] no data retrieved")
     df = pd.DataFrame(recs)
+    for c in ("pwat", "cbase", "dcape", "motion", "dlp_mod", "dlp_high"):
+        if c not in df:
+            df[c] = np.nan
+        df[c] = pd.to_numeric(df[c], errors="coerce")
     aft = df[df.hour.isin(AFTERNOON)]
     out = pd.concat([
         aft.groupby(["psa", "date"]).agg(wind=("wind", "max"), gust=("gust", "max"), minrh=("minrh", "min"),
-                                         thunder=("thunder", "max"), lapse=("lapse", "max"), hdwi=("hdwi", "max")),
+                                         thunder=("thunder", "max"), lapse=("lapse", "max"), hdwi=("hdwi", "max"),
+                                         pwat=("pwat", "min"), cbase=("cbase", "max"), dcape=("dcape", "max"),
+                                         motion=("motion", "mean"), dlp_mod=("dlp_mod", "max"), dlp_high=("dlp_high", "max")),
         df.groupby(["psa", "date"]).agg(tmax=("tmax", "max"), qpf=("qpf", "sum")),
     ], axis=1).reset_index()
     out["model"], out["init"] = name, init.strftime("%Y-%m-%dT%HZ")
@@ -347,7 +558,8 @@ def cmd_model(a):
         dkeys = [d.isoformat() for d in days]
         stack = lambda f: np.stack([grid[f].get(k, np.full(grid["lat"].shape, np.nan)) for k in dkeys]).astype("float16")
         np.savez_compressed(a.out.replace(".csv", "_grids.npz"), lat=grid["lat"], lon=grid["lon"], days=np.array(dkeys),
-                            rh=stack("rh"), gust=stack("gust"), qpf=stack("qpf"), init=init.strftime("%Y-%m-%dT%HZ"))
+                            rh=stack("rh"), gust=stack("gust"), qpf=stack("qpf"), dlp=stack("dlp"),
+                            init=init.strftime("%Y-%m-%dT%HZ"))
         print(f"[{name}] saved daily grids for maps", flush=True)
     print(f"[{name}] wrote {a.out}: {len(out)} PSA-days", flush=True)
 
@@ -405,7 +617,14 @@ def classify(cfg, psa, rec, d):
         pc = cfg["psas"].get(psa, {})
         hot = pc.get("hot_day_f") or cfg["hot_day_default_f"]
         peak = pc.get("peak_tmax_f") or cfg["much_above_peak_default_f"]
-        if th is not None and th >= cfg["lightning_coverage_pct"] and rh is not None and rh < cfg["lightning_rh_below"]:
+        dl = gv("dlp", d)
+        if dl is not None and dl >= 3:
+            trig.append("L")
+            why.append(f"L: high dry lightning potential (PWAT {gv('pwat', d)} in, cloud base {gv('cbase', d) or 0:,.0f} ft, "
+                       f"DCAPE {gv('dcape', d) or 0:,.0f} J/kg, storm motion {gv('motion', d)} kt).")
+        elif dl == 2:
+            why.append(f"Moderate dry lightning potential over about {gv('dlp_mod', d) or 0:.0f}% of the PSA.")
+        if "L" not in trig and th is not None and th >= cfg["lightning_coverage_pct"] and rh is not None and rh < cfg["lightning_rh_below"]:
             hot_n = sum(1 for k in range(d - 3, d) if k >= 0 and (gv("tmax", k) or -999) >= hot)
             n = d + 1 if d < 6 else d
             after = (gv("minrh", n) is not None and gv("minrh", n) < cfg["lightning_rh_below"]) or wind_ok(n)
@@ -566,12 +785,15 @@ def auto_discussion(days, psas, out, fires=None, cfg=None):
             "wet": sorted([p for p in SW_PSAS if (val(p, "qpf", i) or 0) >= 0.10], key=SW_PSAS.index),
             "storms": sorted([p for p in SW_PSAS if (val(p, "thunder", i) or 0) >= cfg.get("lightning_coverage_pct", 25)],
                              key=SW_PSAS.index),
+            "dlm": sorted([p for p in SW_PSAS if (val(p, "dlp", i) or 0) == 2], key=SW_PSAS.index),
+            "dlh": sorted([p for p in SW_PSAS if (val(p, "dlp", i) or 0) >= 3], key=SW_PSAS.index),
             "trig": {t: sorted([p for p in SW_PSAS if out[p][i]["trigger"] == t], key=SW_PSAS.index) for t in "WLB"},
             "brown": sorted([p for p in SW_PSAS if out[p][i]["category"] == "brown"], key=SW_PSAS.index),
         }
 
     D = [info(i) for i in range(7)]
-    sig = lambda d: (bool(d["windy"]), bool(d["dry"]), tuple(d["wet"]), tuple(d["storms"]), any(d["trig"].values()))
+    sig = lambda d: (bool(d["windy"]), bool(d["dry"]), tuple(d["wet"]), tuple(d["storms"]), tuple(d["dlm"]),
+                     tuple(d["dlh"]), any(d["trig"].values()))
     periods, cur = [], [0]
     for i in range(1, 7):
         if sig(D[i]) == sig(D[cur[-1]]) and not any(D[i]["trig"].values()):
@@ -588,7 +810,9 @@ def auto_discussion(days, psas, out, fires=None, cfg=None):
         windy = sorted({p for i in ids for p in D[i]["windy"]}, key=SW_PSAS.index)
         dry = sorted({p for i in ids for p in D[i]["dry"]}, key=SW_PSAS.index)
         wet = sorted({p for i in ids for p in D[i]["wet"]}, key=SW_PSAS.index)
-        storms = sorted({p for i in ids for p in D[i]["storms"]}, key=SW_PSAS.index)
+        dlh = sorted({p for i in ids for p in D[i]["dlh"]}, key=SW_PSAS.index)
+        dlm = sorted({p for i in ids for p in D[i]["dlm"]} - set(dlh), key=SW_PSAS.index)
+        storms = sorted({p for i in ids for p in D[i]["storms"]} - set(dlh) - set(dlm), key=SW_PSAS.index)
         bits = []
         if windy:
             pk = max(windy, key=lambda p: g[p])
@@ -600,12 +824,16 @@ def auto_discussion(days, psas, out, fires=None, cfg=None):
             bits.append(f"minimum humidity of 15% or lower {_in(dry)}")
         elif rh:
             bits.append(f"minimum humidity of {min(rh.values()):.0f}-{max(rh.values()):.0f}%")
+        if dlh:
+            bits.append(f"high-based, low-precipitation storms with a high threat of dry lightning {_in(dlh)}")
+        if dlm:
+            bits.append(f"high-based storms with some dry lightning potential {_in(dlm)}")
         if storms:
             bits.append(f"scattered thunderstorms {_in(storms)}")
         if wet:
             bits.append(f"wetting rain {_in(wet)}")
         verb = "brings" if len(ids) == 1 else "bring"
-        if not windy and not dry and not storms and not wet:
+        if not windy and not dry and not storms and not wet and not dlh and not dlm:
             lead = f"{when} {'looks' if len(ids) == 1 else 'look'} quiet, with " + " and ".join(bits)
         else:
             lead = f"{when} {verb} " + (", ".join(bits[:-1]) + (", and " if len(bits) > 2 or "," in bits[0] else " and ")
@@ -620,6 +848,12 @@ def auto_discussion(days, psas, out, fires=None, cfg=None):
             rm = min((val(p, "minrh", i) or 100) for p in ps)
             if t == "W":
                 det = f"gusts to {max((val(p, 'gust', i) or 0) for p in ps):.0f} mph and humidity near {rm:.0f}%"
+            elif t == "L" and any((val(p, "dlp", i) or 0) >= 3 for p in ps):
+                pw = min((val(p, "pwat", i) or 9) for p in ps)
+                cb = max((val(p, "cbase", i) or 0) for p in ps)
+                dc = max((val(p, "dcape", i) or 0) for p in ps)
+                det = (f"precipitable water near {pw:.2f} inch, cloud bases around {cb / 1000:.0f},000 feet and DCAPE near "
+                       f"{dc:,.0f} J/kg favoring dry lightning and gusty outflow winds")
             elif t == "L":
                 det = f"thunderstorms over about {max((val(p, 'thunder', i) or 0) for p in ps):.0f}% of the area and humidity near {rm:.0f}%"
             else:
@@ -1011,6 +1245,7 @@ MAP_FIELDS = {
     "gust": ("Peak wind gust", "mph", [0, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 80],
              ["#f7fbff", "#d6e9f5", "#a8d8b9", "#e6f598", "#fee08b", "#fdae61", "#f46d43",
               "#d73027", "#a50026", "#7a0177", "#49006a"]),
+    "dlp": ("Dry lightning potential", "score", [1.5, 3, 5, 7.5], ["#fee08b", "#f46d43", "#a50026"]),
     "qpf": ("Precipitation", "in", [0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 1.0, 1.5, 2.0, 3.0, 5.0],
             ["#d9f0d3", "#a6dba0", "#5aae61", "#1b7837", "#a6cee3", "#1f78b4", "#6a51a3",
              "#cb181d", "#fd8d3c", "#fed976"]),
@@ -1103,14 +1338,25 @@ def cmd_maps(a):
         lat, lon = G["lat"].astype(float), G["lon"].astype(float)
         lon = np.where(lon > 180, lon - 360, lon)
         gdays = [str(x) for x in G["days"]]
+        others = [np.load(x, allow_pickle=False) for x in
+                  [os.path.join(a.partials, "GFS_grids.npz"), os.path.join(a.partials, "NBM_grids.npz")] if os.path.exists(x)]
         for f, (label, unit, bins, colors) in MAP_FIELDS.items():
+            # use the first grid file that actually has this field (NBM has no dry lightning fields; GFS does)
+            src = next((X for X in [G] + others if f in X.files and np.isfinite(X[f].astype(float)).any()
+                        and np.nanmax(X[f].astype(float)) > 0), None)
+            if src is None:
+                continue
+            fmodel = model if src is G else "GFS"
+            flat, flon = src["lat"].astype(float), src["lon"].astype(float)
+            flon = np.where(flon > 180, flon - 360, flon)
+            fdays = [str(x) for x in src["days"]]
             cmap = ListedColormap(colors)
-            if f == "qpf":
+            if f in ("qpf", "dlp"):
                 cmap.set_under((1, 1, 1, 0))
-            norm = BoundaryNorm(bins, cmap.N, clip=f != "qpf")
-            data = G[f].astype(float)
+            norm = BoundaryNorm(bins, cmap.N, clip=f not in ("qpf", "dlp"))
+            data = src[f].astype(float)
             paths = []
-            series = [(i, data[gdays.index(d)] if d in gdays else None) for i, d in enumerate(days)]
+            series = [(i, data[fdays.index(d)] if d in fdays else None) for i, d in enumerate(days)]
             if f == "qpf":
                 tot = np.nansum(np.stack([x for _, x in series if x is not None]), axis=0)
                 series.append(("total", tot))
@@ -1119,20 +1365,22 @@ def cmd_maps(a):
                     paths.append(None)
                     continue
                 fig, ax, plt = _frame(gj)
-                m = ax.pcolormesh(lon, lat, np.ma.masked_invalid(arr), cmap=cmap, norm=norm, shading="auto", zorder=0)
+                m = ax.pcolormesh(flon, flat, np.ma.masked_invalid(arr), cmap=cmap, norm=norm, shading="auto", zorder=0)
                 _draw_psas(ax, gj)
                 when = f"7-day total {dlab(days[0])} - {dlab(days[-1])}" if i == "total" else f"Day {i + 1}  {dlab(days[i])}"
-                _titles(fig, f"{model} {label} ({unit})  |  {when}", f"Init {str(G['init'])}")
+                _titles(fig, f"{fmodel} {label}" + ("" if f == "dlp" else f" ({unit})") + f"  |  {when}", f"Init {str(src['init'])}")
                 cax = fig.add_axes([0.15, 0.055, 0.7, 0.025])
                 cb = fig.colorbar(m, cax=cax, orientation="horizontal", ticks=bins,
                                   extend="max" if f == "qpf" else "neither")
                 cb.ax.tick_params(labelsize=8)
                 if f == "qpf":
                     cb.ax.set_xticklabels([f"{b:g}" for b in bins])
+                if f == "dlp":
+                    cb.set_ticks([2.25, 4, 6.25]); cb.ax.set_xticklabels(["Low", "Moderate", "High"])
                 fn = f"{f}_{'total' if i == 'total' else 'd' + str(i + 1)}.png"
                 fig.savefig(os.path.join(a.out_dir, fn)); plt.close(fig)
                 paths.append(f"{rel}/{fn}")
-            entry = {"label": label, "unit": unit, "days": paths[:7]}
+            entry = {"label": label, "unit": unit, "days": paths[:7], "source": f"{fmodel} {str(src['init'])}"}
             if f == "qpf":
                 entry["total"] = paths[7]
             manifest["fields"][f] = entry
@@ -1143,7 +1391,12 @@ def cmd_maps(a):
     brown = [i for p, c in O["outlook"].items() for i in range(7) if c[i]["category"] == "brown"]
     if trig and gfile:
         i, p, t = sorted(trig)[0]
-        feat = ("gust", i, "Peak gusts on the first wind trigger day") if t == "W" else ("rh", i, "Minimum RH on the first trigger day")
+        if t == "W":
+            feat = ("gust", i, "Peak gusts on the first wind trigger day")
+        elif t == "L" and manifest["fields"].get("dlp"):
+            feat = ("dlp", i, "Dry lightning potential on the first lightning trigger day")
+        else:
+            feat = ("rh", i, "Minimum RH on the first trigger day")
     elif trig or brown:
         feat = ("outlook", sorted(trig)[0][0] if trig else min(brown), "PSA outlook on the first day of concern")
     elif gfile and manifest["fields"].get("qpf", {}).get("total"):
@@ -1157,6 +1410,32 @@ def cmd_maps(a):
     O["maps"] = manifest
     json.dump(O, open(a.outlook, "w"), indent=1, default=str)
     print(f"Maps written to {a.out_dir}; featured: {feat}")
+
+
+def cmd_climo_check(a):
+    """Decide whether the FEMS climatology must be rebuilt; writes run=1/why=... for GitHub Actions."""
+    why = None
+    if a.force:
+        why = "rebuild requested"
+    elif not os.path.exists(a.climo) or os.path.getsize(a.climo) == 0:
+        why = "missing"
+    else:
+        d = json.load(open(a.climo))
+        try:
+            age = (datetime.now(timezone.utc).date() - datetime.fromisoformat(d.get("created", "2000-01-01")).date()).days
+        except ValueError:
+            age = 9999
+        if age > 365:
+            why = "older than a year"
+        elif not any(isinstance(v, dict) and "normals" in v for v in d.values()):
+            why = "no normals yet"
+        elif d.get("psa_hash") != psa_hash(a.psa):
+            why = "PSA boundaries changed"
+    print(f"Climatology: {'rebuild needed - ' + why if why else 'current'}")
+    out = os.environ.get("GITHUB_OUTPUT")
+    if out:
+        with open(out, "a") as fh:
+            fh.write(f"run={'1' if why else ''}\nwhy={why or 'current'}\n")
 
 
 def cmd_blend(a):
@@ -1245,6 +1524,12 @@ def cmd_blend(a):
                 if psas[p]["fires"][i] is None:
                     psas[p]["fires"][i] = fires["counts"].get(p, 0)
 
+    # Dry lightning potential level per PSA-day from the blended area coverage
+    for p in SW_PSAS:
+        mod, high = psas[p].get("dlp_mod") or [None] * 7, psas[p].get("dlp_high") or [None] * 7
+        psas[p]["dlp"] = [dlp_level(mod[i], high[i], cfg) if (mod[i] is not None or high[i] is not None) else None
+                          for i in range(7)]
+
     out = {p: [classify(cfg, p, psas[p], i) for i in range(7)] for p in SW_PSAS}
 
     # forecaster overrides win
@@ -1284,7 +1569,7 @@ def main():
     s = sub.add_parser("model")
     s.add_argument("--model", required=True, choices=list(MODELS) + [m.lower() for m in MODELS])
     s.add_argument("--psa", default="docs/psa.geojson"); s.add_argument("--init")
-    s.add_argument("--out")
+    s.add_argument("--out"); s.add_argument("--config", default="config/thresholds.json")
     s = sub.add_parser("blend")
     s.add_argument("--partials", default="partials"); s.add_argument("--config", default="config/thresholds.json")
     s.add_argument("--fuels", default="data/fuels.csv"); s.add_argument("--overrides", default="data/overrides.csv")
@@ -1308,6 +1593,9 @@ def main():
         s.add_argument("--config", default="config/thresholds.json")
         s.add_argument("--climo", default="config/fems_climo.json")
     sub.choices["fems"].add_argument("--out", default="docs/fems.csv")
+    s = sub.add_parser("climo-check")
+    s.add_argument("--climo", default="config/fems_climo.json"); s.add_argument("--psa", default="docs/psa.geojson")
+    s.add_argument("--force", action="store_true")
     c = sub.choices["fems-climo"]
     c.add_argument("--out", default="config/fems_climo.json")
     c.add_argument("--start-year", type=int, default=2015); c.add_argument("--end-year", type=int, default=2024)
@@ -1316,7 +1604,7 @@ def main():
     if a.cmd == "model" and not a.out:
         a.out = f"partials/{a.model.upper()}.csv"
     {"fetch-psa": cmd_fetch_psa, "model": cmd_model, "blend": cmd_blend,
-     "fems": cmd_fems, "fems-climo": cmd_fems_climo, "fires": cmd_fires, "maps": cmd_maps}[a.cmd](a)
+     "fems": cmd_fems, "fems-climo": cmd_fems_climo, "fires": cmd_fires, "maps": cmd_maps, "climo-check": cmd_climo_check}[a.cmd](a)
 
 
 if __name__ == "__main__":
