@@ -77,6 +77,7 @@ MODELS = {
     "AIFS":    (dict(model="aifs", product="oper"), list(range(0, 181, 6)), ECMWF, 6),
 }
 MS_TO_MPH, MM_TO_IN = 2.23694, 1 / 25.4
+GRID_MODELS = ("NBM", "GFS")      # these also save daily gridded fields for the discussion maps
 
 
 # ------------------------------------------------------------------ PSAs
@@ -243,6 +244,8 @@ def cmd_model(a):
     print(f"[{name}] init {init:%Y-%m-%d %HZ}", flush=True)
 
     masks, recs, cum, last_total = None, [], {}, None
+    save_grids = name in GRID_MODELS
+    grid = {"box": None, "rh": {}, "gust": {}, "qpf": {}}
     for f in hours:
         valid = init + timedelta(hours=f)
         local = valid.astimezone(MST)
@@ -264,6 +267,13 @@ def cmd_model(a):
                 lon, lat = np.meshgrid(lon, lat)
             lon = np.where(lon > 180, lon - 360, lon)
             masks = {k: shapely.contains_xy(g, lon, lat) for k, g in psas.items()}
+            if save_grids:
+                lo0, lo1, la0, la1 = SW_BBOX
+                inb = (lon >= lo0) & (lon <= lo1) & (lat >= la0) & (lat <= la1)
+                rr, cc = np.where(inb)
+                step_px = max(1, int(round(max(np.ptp(rr), np.ptp(cc)) / 700)))     # keep maps under ~700 px across
+                sl = (slice(rr.min(), rr.max() + 1, step_px), slice(cc.min(), cc.max() + 1, step_px))
+                grid.update(box=sl, lat=lat[sl].astype("float32"), lon=lon[sl].astype("float32"))
         g = {k: (None if v is None else np.asarray(v.values, dtype=float)) for k, v in fld.items()}
 
         wspd = np.hypot(g["u10"], g["v10"]) if g.get("u10") is not None and g.get("v10") is not None else g.get("wspd")
@@ -286,6 +296,17 @@ def cmd_model(a):
                 cum[s1] = total
                 step_precip = (total - (last_total if last_total is not None else 0)) * MM_TO_IN
                 last_total = total
+
+        if save_grids:
+            sl, dk = grid["box"], local.date().isoformat()
+            if local.hour in AFTERNOON:
+                if rh is not None:
+                    grid["rh"][dk] = np.fmin(grid["rh"].get(dk, np.inf), rh[sl])
+                gg = g.get("gust") if g.get("gust") is not None else wspd
+                if gg is not None:
+                    grid["gust"][dk] = np.fmax(grid["gust"].get(dk, -np.inf), gg[sl] * MS_TO_MPH)
+            if step_precip is not None:
+                grid["qpf"][dk] = grid["qpf"].get(dk, 0) + np.clip(step_precip[sl], 0, None)
 
         for psa, mk in masks.items():
             if not mk.any():
@@ -316,6 +337,12 @@ def cmd_model(a):
     out["model"], out["init"] = name, init.strftime("%Y-%m-%dT%HZ")
     os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
     out.to_csv(a.out, index=False)
+    if save_grids and grid["box"] is not None:
+        dkeys = [d.isoformat() for d in days]
+        stack = lambda f: np.stack([grid[f].get(k, np.full(grid["lat"].shape, np.nan)) for k in dkeys]).astype("float16")
+        np.savez_compressed(a.out.replace(".csv", "_grids.npz"), lat=grid["lat"], lon=grid["lon"], days=np.array(dkeys),
+                            rh=stack("rh"), gust=stack("gust"), qpf=stack("qpf"), init=init.strftime("%Y-%m-%dT%HZ"))
+        print(f"[{name}] saved daily grids for maps", flush=True)
     print(f"[{name}] wrote {a.out}: {len(out)} PSA-days", flush=True)
 
 
@@ -405,135 +432,203 @@ def _day(d):
     return f"{datetime.fromisoformat(d):%a %b %-d}"
 
 
-def auto_discussion(days, psas, out, fires=None, cfg=None):
-    """Write the discussion as paragraphs from the blended data. Returns a list of paragraphs (markdown)."""
-    paras = []
-    val = lambda p, f, i: (psas[p].get(f) or [None] * 7)[i]
+# ---- plain-language areas instead of PSA codes
+STATE_BOX = {"AZ": (-114.82, -109.05, 31.33, 37.0), "NM": (-109.05, -103.0, 31.33, 37.0)}
+_REGION = {}
 
-    # Headline
-    trig_days = [(i, p, out[p][i]["trigger"]) for i in range(7) for p in SW_PSAS if out[p][i]["trigger"]]
-    worst = max((("nodata", "green", "yellow", "brown").index(out[p][i]["category"]), i, p)
-                for i in range(7) for p in SW_PSAS)
-    if trig_days:
-        by = {}
-        for i, p, t in trig_days:
-            by.setdefault((i, t), []).append(p)
-        bits = [f"{TRIG_NAME[t]} ({_plist(ps)}) on {_day(days[i])}" for (i, t), ps in sorted(by.items())]
-        paras.append("**Headline:** High Risk triggers are forecast: " + "; ".join(bits) + ".")
-    elif worst[0] == 0:
-        paras.append("**Headline:** Waiting on FEMS fuels data; no PSA can be rated yet.")
-    elif worst[0] == 1:
-        paras.append("**Headline:** Little or no risk for large fire across the Southwest through "
-                     f"{_day(days[-1])}. No High Risk triggers are forecast.")
-    else:
-        cats = sorted({out[p][i]["category"] for i in range(7) for p in SW_PSAS} - {"nodata"},
-                      key=("green", "yellow", "brown").index)
-        paras.append(f"**Headline:** No High Risk triggers are forecast through {_day(days[-1])}. "
-                     f"Fuels range from {CAT_NAME[cats[0]]} to {CAT_NAME[cats[-1]]}.")
 
-    # Fuels
-    pct = {p: (out[p][0].get("erc_pct"), out[p][-1].get("erc_pct")) for p in SW_PSAS}
-    have = {p: v for p, v in pct.items() if v[0] is not None}
-    if have:
-        lo = cfg["erc_low_pct"] if cfg else 60
-        hi = cfg["erc_mod_pct"] if cfg else 90
-        g = [p for p, v in have.items() if v[0] < lo]
-        y = [p for p, v in have.items() if lo <= v[0] < hi]
-        b = [p for p, v in have.items() if v[0] >= hi]
-        s = [f"Today's ERC is below the {lo}th percentile in {len(g)} of {len(have)} PSAs"]
-        if y:
-            s.append(f"between the {lo}th and {hi}th in {_plist(y)}")
-        if b:
-            s.append(f"at or above the {hi}th in {_plist(b)}")
-        txt = "**Fuels:** " + ", ".join(s) + "."
-        top = max(have, key=lambda p: have[p][0])
-        txt += f" Driest is {top} at about the {have[top][0]}th percentile."
-        up = [p for p, v in have.items() if v[1] is not None and v[1] - v[0] >= 10]
-        dn = [p for p, v in have.items() if v[1] is not None and v[0] - v[1] >= 10]
-        if up:
-            txt += f" ERC trends up through the period in {_plist(up)}."
-        if dn:
-            txt += f" ERC trends down in {_plist(dn)}."
-        k1000 = [val(p, "fm1000", 0) for p in SW_PSAS if val(p, "fm1000", 0) is not None]
-        if k1000:
-            txt += f" 1000-hr fuel moisture ranges {min(k1000):.0f}-{max(k1000):.0f}%."
-        paras.append(txt)
-    else:
-        paras.append("**Fuels:** No FEMS NFDRS data was available for this run, so PSAs show no data.")
+def load_regions(psa_path):
+    """Give each PSA a description such as 'northern AZ' or 'east-central NM' from its boundary's center point."""
+    _REGION.clear()
+    if not psa_path or not os.path.exists(psa_path):
+        return
+    for f in json.load(open(psa_path))["features"]:
+        pr = f["properties"]
+        x, y = pr.get("lx"), pr.get("ly")
+        if x is None:
+            continue
+        if x > -106.7 and y < 32.0:
+            _REGION[pr["psa"]] = ("TX", "far west")
+            continue
+        st = "AZ" if x < -109.05 else "NM"
+        x0, x1, y0, y1 = STATE_BOX[st]
+        fx, fy = (x - x0) / (x1 - x0), (y - y0) / (y1 - y0)
+        ns = "north" if fy > 0.62 else "south" if fy < 0.33 else "central"
+        ew = "west" if fx < 0.33 else "east" if fx > 0.67 else "central"
+        word = {("north", "west"): "northwest", ("north", "central"): "northern", ("north", "east"): "northeast",
+                ("central", "west"): "west-central", ("central", "central"): "central", ("central", "east"): "east-central",
+                ("south", "west"): "southwest", ("south", "central"): "southern", ("south", "east"): "southeast"}[(ns, ew)]
+        _REGION[pr["psa"]] = (st, word)
 
-    # Fire on the ground
-    if fires is not None:
-        act = fires.get("fires", [])
-        if act:
-            act = sorted(act, key=lambda f: -(f.get("acres") or 0))
-            lst = ", ".join(f"{f['name']} ({f['psa']}, {f['acres']:,.0f} ac, {f['contained'] if f['contained'] is not None else '?'}% contained)"
-                            for f in act[:6])
-            paras.append(f"**Fire on the ground:** {len(act)} active wildfire{'' if len(act) == 1 else 's'} of {fires.get('min_acres', 100):g}+ acres: {lst}"
-                         + (f", and {len(act) - 6} more." if len(act) > 6 else "."))
+
+def _area(psas):
+    """'northern and central AZ', 'much of NM', 'across the Southwest' ..."""
+    psas = [p for p in psas]
+    if not psas:
+        return "the area"
+    if not _REGION:
+        return "parts of the area"
+    known = [p for p in SW_PSAS if p in _REGION]
+    if len(psas) >= 0.8 * len(known):
+        return "across the Southwest" if len(psas) == len(known) else "across most of the Southwest"
+    out = []
+    for st in ("AZ", "NM", "TX"):
+        allst = [p for p in known if _REGION[p][0] == st]
+        mine = [p for p in psas if _REGION.get(p, ("", ""))[0] == st]
+        if not mine:
+            continue
+        if st == "TX":
+            out.append("far west Texas")
+        elif len(mine) == len(allst):
+            out.append(f"all of {st}")
+        elif len(mine) >= 0.7 * len(allst):
+            out.append(f"much of {st}")
         else:
-            paras.append(f"**Fire on the ground:** No active wildfires of {fires.get('min_acres', 100):g}+ acres in the Southwest.")
+            words = []
+            for p in mine:
+                w = _REGION[p][1]
+                if w not in words:
+                    words.append(w)
+            # fold e.g. northwest + northern + northeast into 'northern'
+            for band, group in (("northern", {"northwest", "northern", "northeast"}),
+                                ("southern", {"southwest", "southern", "southeast"}),
+                                ("central", {"west-central", "central", "east-central"})):
+                if len(group & set(words)) >= 2:
+                    words = [w for w in words if w not in group]
+                    words.insert(0, band)
+            order = ["northwest", "northern", "northeast", "west-central", "central", "east-central",
+                     "southwest", "southern", "southeast"]
+            words.sort(key=order.index)
+            out.append(f"{_plist(words)} {st}")
+    return _plist(out)
 
-    # Weather, grouping quiet days
-    def wx_day(i):
-        gv = lambda f: {p: val(p, f, i) for p in SW_PSAS if val(p, f, i) is not None}
-        g, rh, q, th, tx = gv("gust"), gv("minrh"), gv("qpf"), gv("thunder"), gv("tmax")
-        notes, notable = [], False
-        if g:
-            gp = max(g, key=g.get)
-            windy = [p for p, v in g.items() if v >= 35]
-            if windy:
-                notable = True
-                notes.append(f"gusts of 35+ mph in {_plist(windy)} (peak {g[gp]:.0f} mph in {gp})")
-            else:
-                notes.append(f"gusts under {max(g.values()) + 5 - max(g.values()) % 5:.0f} mph")
-        if rh:
-            dry = [p for p, v in rh.items() if v <= 15]
-            if dry:
-                notable = True
-                notes.append(f"min RH 15% or lower in {_plist(dry)}")
-            else:
-                notes.append(f"min RH {min(rh.values()):.0f}-{max(rh.values()):.0f}%")
-        wet = [p for p, v in q.items() if v >= 0.10]
-        if wet:
-            notable = True
-            notes.append(f"wetting rain (0.10+ in) in {_plist(wet)}")
-        elif q:
-            notes.append("little or no precipitation")
-        storms = [p for p, v in th.items() if v >= 25]
-        if storms:
-            notable = True
-            notes.append(f"scattered thunderstorms in {_plist(storms)}")
-        if tx:
-            notes.append(f"highs to {max(tx.values()):.0f}F")
-        return notable, notes
 
-    if any(val(p, "gust", 0) is not None or val(p, "minrh", 0) is not None for p in SW_PSAS):
-        lines, quiet = [], []
-        for i in range(7):
-            notable, notes = wx_day(i)
-            if not notes:
-                continue
-            if notable or out_has_trigger(out, i):
-                if quiet:
-                    lines.append(quiet_line(days, quiet))
-                    quiet = []
-                lines.append(f"**{_day(days[i])}:** " + "; ".join(notes) + ".")
-            else:
-                quiet.append((i, notes))
-        if quiet:
-            lines.append(quiet_line(days, quiet))
-        paras += lines
+def _in(psas):
+    a = _area(psas)
+    return a if a.startswith("across") else "in " + a
+
+
+def _wd(days, i):
+    return "Today" if i == 0 else f"{datetime.fromisoformat(days[i]):%A}"
+
+
+def _days_text(days, idx):
+    """'Wednesday', 'Wednesday and Thursday', or 'Wednesday through Friday'."""
+    idx = sorted(set(idx))
+    if len(idx) == 1:
+        return _wd(days, idx[0])
+    if idx == list(range(idx[0], idx[-1] + 1)):
+        joiner = " and " if len(idx) == 2 else " through "
+        return _wd(days, idx[0]) + joiner + _wd(days, idx[-1])
+    return _plist([_wd(days, i) for i in idx])
+
+
+def _paragraphs(sentences, max_words=110):
+    """Join sentences into paragraphs, starting a new one when a paragraph runs long.
+    A sentence tuple (text, True) marks a good place to break (start of a new day/period)."""
+    paras, cur, words = [], [], 0
+    for text, breakable in sentences:
+        n = len(text.split())
+        if cur and breakable and words + n > max_words:
+            paras.append(" ".join(cur))
+            cur, words = [], 0
+        cur.append(text)
+        words += n
+    if cur:
+        paras.append(" ".join(cur))
     return paras
 
 
-def out_has_trigger(out, i):
-    return any(out[p][i]["trigger"] for p in SW_PSAS)
+def auto_discussion(days, psas, out, fires=None, cfg=None):
+    """Weather discussion in day order. Quiet, similar days are grouped; High Risk trigger days are called out.
+    Long paragraphs are split at the start of a new day."""
+    cfg = cfg or {"erc_low_pct": 60, "erc_mod_pct": 90}
+    val = lambda p, f, i: (psas[p].get(f) or [None] * 7)[i]
+    S = []                                   # (sentence, ok to start a paragraph here)
 
+    # ---------------- day by day
+    if not any(val(p, "gust", 0) is not None or val(p, "minrh", 0) is not None for p in SW_PSAS):
+        return ["Model weather data was not available for this run."]
 
-def quiet_line(days, quiet):
-    i0, i1 = quiet[0][0], quiet[-1][0]
-    span = _day(days[i0]) if i0 == i1 else f"{_day(days[i0])} - {_day(days[i1])}"
-    return f"**{span}:** quiet. " + quiet[0][1][0][0].upper() + "; ".join(quiet[0][1])[1:] + "."
+    def info(i):
+        g = {p: val(p, "gust", i) for p in SW_PSAS if val(p, "gust", i) is not None}
+        rh = {p: val(p, "minrh", i) for p in SW_PSAS if val(p, "minrh", i) is not None}
+        return {
+            "g": g, "rh": rh,
+            "windy": sorted([p for p, v in g.items() if v >= cfg.get("wind_gust_mph", 35)], key=SW_PSAS.index),
+            "dry": sorted([p for p, v in rh.items() if v <= cfg.get("wind_rh_max", 15)], key=SW_PSAS.index),
+            "wet": sorted([p for p in SW_PSAS if (val(p, "qpf", i) or 0) >= 0.10], key=SW_PSAS.index),
+            "storms": sorted([p for p in SW_PSAS if (val(p, "thunder", i) or 0) >= cfg.get("lightning_coverage_pct", 25)],
+                             key=SW_PSAS.index),
+            "trig": {t: sorted([p for p in SW_PSAS if out[p][i]["trigger"] == t], key=SW_PSAS.index) for t in "WLB"},
+            "brown": sorted([p for p in SW_PSAS if out[p][i]["category"] == "brown"], key=SW_PSAS.index),
+        }
+
+    D = [info(i) for i in range(7)]
+    sig = lambda d: (bool(d["windy"]), bool(d["dry"]), tuple(d["wet"]), tuple(d["storms"]), any(d["trig"].values()))
+    periods, cur = [], [0]
+    for i in range(1, 7):
+        if sig(D[i]) == sig(D[cur[-1]]) and not any(D[i]["trig"].values()):
+            cur.append(i)
+        else:
+            periods.append(cur)
+            cur = [i]
+    periods.append(cur)
+
+    for k, ids in enumerate(periods):
+        when = _days_text(days, ids)
+        g = {p: max(D[i]["g"].get(p, 0) for i in ids) for p in SW_PSAS}
+        rh = {p: min(D[i]["rh"].get(p, 100) for i in ids) for p in SW_PSAS}
+        windy = sorted({p for i in ids for p in D[i]["windy"]}, key=SW_PSAS.index)
+        dry = sorted({p for i in ids for p in D[i]["dry"]}, key=SW_PSAS.index)
+        wet = sorted({p for i in ids for p in D[i]["wet"]}, key=SW_PSAS.index)
+        storms = sorted({p for i in ids for p in D[i]["storms"]}, key=SW_PSAS.index)
+        bits = []
+        if windy:
+            pk = max(windy, key=lambda p: g[p])
+            bits.append(f"gusts of 35 mph or more {_in(windy)}, peaking near {g[pk]:.0f} mph")
+        elif g:
+            cap = int(np.ceil((max(g.values()) + 0.1) / 5.0) * 5)
+            bits.append(f"gusts under {cap} mph")
+        if dry:
+            bits.append(f"minimum humidity of 15% or lower {_in(dry)}")
+        elif rh:
+            bits.append(f"minimum humidity of {min(rh.values()):.0f}-{max(rh.values()):.0f}%")
+        if storms:
+            bits.append(f"scattered thunderstorms {_in(storms)}")
+        if wet:
+            bits.append(f"wetting rain {_in(wet)}")
+        verb = "brings" if len(ids) == 1 else "bring"
+        if not windy and not dry and not storms and not wet:
+            lead = f"{when} {'looks' if len(ids) == 1 else 'look'} quiet, with " + " and ".join(bits)
+        else:
+            lead = f"{when} {verb} " + (", ".join(bits[:-1]) + (", and " if len(bits) > 2 or "," in bits[0] else " and ")
+                                        + bits[-1] if len(bits) > 1 else bits[0])
+        S.append((lead + ".", True))
+
+        for t, name in (("L", "Lightning"), ("W", "Wind"), ("B", "Burn environment")):
+            ps = D[ids[0]]["trig"][t]
+            if not ps:
+                continue
+            i = ids[0]
+            rm = min((val(p, "minrh", i) or 100) for p in ps)
+            if t == "W":
+                det = f"gusts to {max((val(p, 'gust', i) or 0) for p in ps):.0f} mph and humidity near {rm:.0f}%"
+            elif t == "L":
+                det = f"thunderstorms over about {max((val(p, 'thunder', i) or 0) for p in ps):.0f}% of the area and humidity near {rm:.0f}%"
+            else:
+                det = f"highs near {max((val(p, 'tmax', i) or 0) for p in ps):.0f}F, humidity near {rm:.0f}% and an unstable atmosphere"
+            S.append((f"A {name} High Risk trigger is forecast {_in(ps)}, with {det}.", False))
+
+    tx = [(val(p, "tmax", i), i) for p in SW_PSAS for i in range(7) if val(p, "tmax", i) is not None]
+    if tx:
+        t0 = np.mean([v for v, i in tx if i == 0])
+        t6 = np.mean([v for v, i in tx if i == 6]) if any(i == 6 for _, i in tx) else t0
+        if t6 - t0 >= 5:
+            S.append(("Temperatures warm through the period.", False))
+        elif t0 - t6 >= 5:
+            S.append(("Temperatures cool through the period.", False))
+    return _paragraphs(S)
 
 
 # ------------------------------------------------------------------ FEMS
@@ -877,6 +972,162 @@ def cmd_fires(a):
     print(f"Wrote {a.out}: {len(fires)} active fires >= {min_ac:g} ac")
 
 
+# ------------------------------------------------------------------ discussion maps
+MAP_FIELDS = {
+    "rh": ("Minimum RH", "%", [0, 5, 8, 10, 12, 15, 20, 25, 30, 40, 50, 60, 100],
+           ["#5c0a0a", "#9e1b1b", "#d7301f", "#ef6548", "#fc8d59", "#fdbb84", "#fee8a0",
+            "#d9f0a3", "#addd8e", "#78c679", "#41ab5d", "#2b8cbe"]),
+    "gust": ("Peak wind gust", "mph", [0, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 80],
+             ["#f7fbff", "#d6e9f5", "#a8d8b9", "#e6f598", "#fee08b", "#fdae61", "#f46d43",
+              "#d73027", "#a50026", "#7a0177", "#49006a"]),
+    "qpf": ("Precipitation", "in", [0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 1.0, 1.5, 2.0, 3.0, 5.0],
+            ["#d9f0d3", "#a6dba0", "#5aae61", "#1b7837", "#a6cee3", "#1f78b4", "#6a51a3",
+             "#cb181d", "#fd8d3c", "#fed976"]),
+}
+OUTLOOK_COLORS = {"nodata": "#9aa0a3", "green": "#3f9a3f", "yellow": "#e8cf2c", "brown": "#8a5a2b",
+                  "W": "#f08c1e", "B": "#f08c1e", "L": "#d22b25"}
+
+
+def _draw_psas(ax, gj, fill=None, letters=None):
+    from matplotlib.patches import Polygon as MPoly
+    for f in gj["features"]:
+        geom, pr = f["geometry"], f["properties"]
+        polys = geom["coordinates"] if geom["type"] == "MultiPolygon" else [geom["coordinates"]]
+        for poly in polys:
+            ring = np.array(poly[0])
+            if fill:
+                ax.add_patch(MPoly(ring, closed=True, facecolor=fill.get(pr["psa"], "#9aa0a3"),
+                                   edgecolor="none", alpha=0.92, zorder=1))
+            for r in poly:
+                r = np.array(r)
+                ax.plot(r[:, 0], r[:, 1], color="#111111", lw=1.0, zorder=3)
+        lab = pr["psa"] + (f"  {letters[pr['psa']]}" if letters and letters.get(pr["psa"]) else "")
+        ax.text(pr["lx"], pr["ly"], lab, ha="center", va="center", fontsize=8.5, fontweight="bold", zorder=4,
+                color="#111111", bbox=dict(boxstyle="square,pad=0.15", fc="white", ec="none", alpha=0.9))
+
+
+def _frame(gj):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    xs = [c[0] for f in gj["features"] for c in _ring_pts(f["geometry"])]
+    ys = [c[1] for f in gj["features"] for c in _ring_pts(f["geometry"])]
+    fig, ax = plt.subplots(figsize=(9, 6.2), dpi=100)
+    ax.set_xlim(min(xs) - 0.3, max(xs) + 0.3)
+    ax.set_ylim(min(ys) - 0.3, max(ys) + 0.3)
+    ax.set_aspect(1 / np.cos(np.radians(34.2)))
+    ax.set_xticks([]); ax.set_yticks([])
+    for sp in ax.spines.values():
+        sp.set_visible(False)
+    fig.subplots_adjust(left=0.01, right=0.99, top=0.93, bottom=0.11)
+    return fig, ax, plt
+
+
+def _ring_pts(geom):
+    polys = geom["coordinates"] if geom["type"] == "MultiPolygon" else [geom["coordinates"]]
+    return [pt for poly in polys for pt in poly[0]]
+
+
+def _titles(fig, left, right):
+    fig.text(0.01, 0.965, left, fontsize=13, fontweight="bold", va="center", color="#111111")
+    fig.text(0.99, 0.965, right, fontsize=9, ha="right", va="center", color="#444444")
+
+
+def cmd_maps(a):
+    """Draw gridded maps (min RH, gusts, QPF) and static outlook maps with PSA outlines; add them to outlook.json."""
+    from matplotlib.colors import BoundaryNorm, ListedColormap
+    gj = json.load(open(a.psa))
+    O = json.load(open(a.outlook))
+    days = O["days"]
+    os.makedirs(a.out_dir, exist_ok=True)
+    rel = os.path.relpath(a.out_dir, os.path.dirname(a.outlook))
+    manifest = {"fields": {}, "source": None}
+    dlab = lambda d: f"{datetime.fromisoformat(d):%a %b %-d}"
+
+    # static outlook maps
+    paths = []
+    for i, d in enumerate(days):
+        fill = {p: OUTLOOK_COLORS[(c[i]["trigger"] or c[i]["category"])] for p, c in O["outlook"].items()}
+        letters = {p: c[i]["trigger"] for p, c in O["outlook"].items() if c[i]["trigger"]}
+        fig, ax, plt = _frame(gj)
+        _draw_psas(ax, gj, fill=fill, letters=letters)
+        _titles(fig, f"7-Day Significant Fire Potential  |  Day {i + 1}  {dlab(d)}", f"Issued {O['run']['created']}")
+        from matplotlib.patches import Patch
+        hand = [Patch(color=OUTLOOK_COLORS[k], label=l) for k, l in
+                [("nodata", "No data"), ("green", "Little/no risk"), ("yellow", "Low"), ("brown", "Moderate"),
+                 ("W", "W / B trigger"), ("L", "L trigger")]]
+        fig.legend(handles=hand, loc="lower center", ncol=6, frameon=False, fontsize=9)
+        fn = f"outlook_d{i + 1}.png"
+        fig.savefig(os.path.join(a.out_dir, fn)); plt.close(fig)
+        paths.append(f"{rel}/{fn}")
+    manifest["fields"]["outlook"] = {"label": "PSA outlook", "days": paths}
+
+    # gridded fields
+    gfile = next((f for f in [os.path.join(a.partials, "NBM_grids.npz"), os.path.join(a.partials, "GFS_grids.npz")]
+                  if os.path.exists(f)), None)
+    if gfile:
+        G = np.load(gfile, allow_pickle=False)
+        model = os.path.basename(gfile).split("_")[0]
+        manifest["source"] = f"{model} {str(G['init'])}"
+        lat, lon = G["lat"].astype(float), G["lon"].astype(float)
+        lon = np.where(lon > 180, lon - 360, lon)
+        gdays = [str(x) for x in G["days"]]
+        for f, (label, unit, bins, colors) in MAP_FIELDS.items():
+            cmap = ListedColormap(colors)
+            if f == "qpf":
+                cmap.set_under((1, 1, 1, 0))
+            norm = BoundaryNorm(bins, cmap.N, clip=f != "qpf")
+            data = G[f].astype(float)
+            paths = []
+            series = [(i, data[gdays.index(d)] if d in gdays else None) for i, d in enumerate(days)]
+            if f == "qpf":
+                tot = np.nansum(np.stack([x for _, x in series if x is not None]), axis=0)
+                series.append(("total", tot))
+            for i, arr in series:
+                if arr is None or np.all(np.isnan(arr)):
+                    paths.append(None)
+                    continue
+                fig, ax, plt = _frame(gj)
+                m = ax.pcolormesh(lon, lat, np.ma.masked_invalid(arr), cmap=cmap, norm=norm, shading="auto", zorder=0)
+                _draw_psas(ax, gj)
+                when = f"7-day total {dlab(days[0])} - {dlab(days[-1])}" if i == "total" else f"Day {i + 1}  {dlab(days[i])}"
+                _titles(fig, f"{model} {label} ({unit})  |  {when}", f"Init {str(G['init'])}")
+                cax = fig.add_axes([0.15, 0.055, 0.7, 0.025])
+                cb = fig.colorbar(m, cax=cax, orientation="horizontal", ticks=bins,
+                                  extend="max" if f == "qpf" else "neither")
+                cb.ax.tick_params(labelsize=8)
+                if f == "qpf":
+                    cb.ax.set_xticklabels([f"{b:g}" for b in bins])
+                fn = f"{f}_{'total' if i == 'total' else 'd' + str(i + 1)}.png"
+                fig.savefig(os.path.join(a.out_dir, fn)); plt.close(fig)
+                paths.append(f"{rel}/{fn}")
+            entry = {"label": label, "unit": unit, "days": paths[:7]}
+            if f == "qpf":
+                entry["total"] = paths[7]
+            manifest["fields"][f] = entry
+
+    # featured map: the thing the discussion is about
+    feat = ("outlook", 0, "PSA outlook for today")
+    trig = [(i, p, c[i]["trigger"]) for p, c in O["outlook"].items() for i in range(7) if c[i]["trigger"]]
+    brown = [i for p, c in O["outlook"].items() for i in range(7) if c[i]["category"] == "brown"]
+    if trig and gfile:
+        i, p, t = sorted(trig)[0]
+        feat = ("gust", i, "Peak gusts on the first wind trigger day") if t == "W" else ("rh", i, "Minimum RH on the first trigger day")
+    elif trig or brown:
+        feat = ("outlook", sorted(trig)[0][0] if trig else min(brown), "PSA outlook on the first day of concern")
+    elif gfile and manifest["fields"].get("qpf", {}).get("total"):
+        tot = np.nansum(np.stack([G["qpf"].astype(float)[k] for k in range(len(gdays))]), axis=0)
+        if np.nanpercentile(tot, 75) >= 0.10:
+            feat = ("qpf", "total", "7-day precipitation")
+        else:
+            lows = [np.nanpercentile(G["rh"].astype(float)[k], 10) for k in range(len(gdays))]
+            feat = ("rh", int(np.nanargmin(lows)), "Minimum RH on the driest day")
+    manifest["featured"] = {"field": feat[0], "day": feat[1], "caption": feat[2]}
+    O["maps"] = manifest
+    json.dump(O, open(a.outlook, "w"), indent=1, default=str)
+    print(f"Maps written to {a.out_dir}; featured: {feat}")
+
+
 def cmd_blend(a):
     cfg = json.load(open(a.config))
     # Temperatures from the FEMS climatology fill any PSA you have not set by hand
@@ -982,7 +1233,7 @@ def cmd_blend(a):
     os.makedirs(a.out_dir, exist_ok=True)
     json.dump({"run": meta, "days": days, "psas": psas}, open(os.path.join(a.out_dir, "forecast.json"), "w"), default=str)
     json.dump({"run": meta, "days": days, "outlook": out, "discussion": disc_md,
-               "auto_discussion": auto_discussion(days, psas, out, fires, cfg),
+               "auto_discussion": (load_regions(a.psa), auto_discussion(days, psas, out, fires, cfg))[1],
                "fires": (fires or {}).get("fires", []),
                "thresholds": {k: v for k, v in cfg.items() if k not in ("psas", "_note")}},
               open(os.path.join(a.out_dir, "outlook.json"), "w"), default=str, indent=1)
@@ -1003,6 +1254,10 @@ def main():
     s.add_argument("--discussion", default="data/discussion.md"); s.add_argument("--reuse", default="docs/forecast.json")
     s.add_argument("--out-dir", default="docs"); s.add_argument("--fems", default="docs/fems.csv")
     s.add_argument("--fires", default="docs/fires.json"); s.add_argument("--climo", default="config/fems_climo.json")
+    s.add_argument("--psa", default="docs/psa.geojson")
+    s = sub.add_parser("maps")
+    s.add_argument("--psa", default="docs/psa.geojson"); s.add_argument("--outlook", default="docs/outlook.json")
+    s.add_argument("--partials", default="partials"); s.add_argument("--out-dir", default="docs/maps")
     s = sub.add_parser("fires")
     s.add_argument("--psa", default="docs/psa.geojson"); s.add_argument("--config", default="config/thresholds.json")
     s.add_argument("--out", default="docs/fires.json")
@@ -1024,7 +1279,7 @@ def main():
     if a.cmd == "model" and not a.out:
         a.out = f"partials/{a.model.upper()}.csv"
     {"fetch-psa": cmd_fetch_psa, "model": cmd_model, "blend": cmd_blend,
-     "fems": cmd_fems, "fems-climo": cmd_fems_climo, "fires": cmd_fires}[a.cmd](a)
+     "fems": cmd_fems, "fems-climo": cmd_fems_climo, "fires": cmd_fires, "maps": cmd_maps}[a.cmd](a)
 
 
 if __name__ == "__main__":
