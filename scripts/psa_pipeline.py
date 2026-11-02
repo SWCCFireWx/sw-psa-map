@@ -118,7 +118,7 @@ def cmd_fetch_psa(a):
         if kind == "query":
             q = urllib.parse.urlencode({"where": "1=1", "outFields": "*", "outSR": 4326, "f": "geojson",
                                         "geometry": f"{lon0},{lat0},{lon1},{lat1}", "geometryType": "esriGeometryEnvelope",
-                                        "inSR": 4326, "spatialRel": "esriSpatialRelIntersects", "resultRecordCount": 2000})
+                                        "inSR": 4326, "spatialRel": "esriSpatialRelIntersects"})
             url = f"{url}?{q}"
         try:
             txt = _http(url, timeout=300)
