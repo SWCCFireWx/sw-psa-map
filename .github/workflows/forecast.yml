@@ -124,13 +124,21 @@ jobs:
       - name: Draw discussion maps
         continue-on-error: true
         run: python scripts/psa_pipeline.py maps
-      - name: Commit forecast data (maps are published, not committed)
+      - name: Save forecast data (maps are published, not committed)
+        continue-on-error: true      # the site still publishes even if saving fails
         run: |
           git config user.name "psa-forecast-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add docs/*.json docs/*.csv docs/*.geojson docs/index.html 2>/dev/null || true
-          git diff --cached --quiet || git commit -m "Forecast update $(date -u +%Y-%m-%dT%H:%MZ)"
-          git pull --rebase -q && git push
+          git add docs/*.json docs/*.csv docs/*.geojson 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -q -m "Forecast update $(date -u +%Y-%m-%dT%H:%MZ)"
+          # If another run saved in the meantime, keep this (newer) run's output files and your edits to everything else.
+          for i in 1 2 3; do
+            git pull -q --rebase -X theirs origin main && git push -q && exit 0
+            git rebase --abort 2>/dev/null || true
+            sleep $((i * 10))
+          done
+          exit 1
       - uses: actions/upload-pages-artifact@v3
         with: { path: docs }
 
