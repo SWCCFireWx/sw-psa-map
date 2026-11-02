@@ -1,6 +1,6 @@
 {
  "run": {
-  "created": "2026-11-02T21:04Z",
+  "created": "2026-11-02T21:58Z",
   "models": [
    {
     "model": "AIFS",
@@ -20,7 +20,7 @@
    },
    {
     "model": "IFS",
-    "init": "2026-11-02T00Z"
+    "init": "2026-11-02T12Z"
    },
    {
     "model": "NAMNEST",
@@ -28,7 +28,7 @@
    },
    {
     "model": "NBM",
-    "init": "2026-11-02T13Z"
+    "init": "2026-11-02T19Z"
    },
    {
     "model": "RAP",
@@ -1235,7 +1235,7 @@
  },
  "discussion": "",
  "auto_discussion": [
-  "Today brings gusts of 35 mph or more in all of NM, peaking near 53 mph, and minimum humidity of 31-51%. Tuesday through Sunday look quiet, with gusts under 35 mph and minimum humidity of 21-34%."
+  "Today brings gusts of 35 mph or more in all of NM, peaking near 52 mph, and minimum humidity of 32-51%. Tuesday through Sunday look quiet, with gusts under 30 mph and minimum humidity of 21-34%."
  ],
  "fires": [],
  "thresholds": {
@@ -1290,7 +1290,7 @@
     "days": [
      "maps/rh_d1.png",
      "maps/rh_d2.png",
-     null,
+     "maps/rh_d3.png",
      null,
      null,
      null,
@@ -1303,7 +1303,7 @@
     "days": [
      "maps/gust_d1.png",
      "maps/gust_d2.png",
-     null,
+     "maps/gust_d3.png",
      null,
      null,
      null,
@@ -1316,7 +1316,7 @@
     "days": [
      "maps/qpf_d1.png",
      "maps/qpf_d2.png",
-     null,
+     "maps/qpf_d3.png",
      null,
      null,
      null,
@@ -1325,7 +1325,7 @@
     "total": "maps/qpf_total.png"
    }
   },
-  "source": "NBM 2026-11-02T13Z",
+  "source": "NBM 2026-11-02T19Z",
   "featured": {
    "field": "rh",
    "day": 1,
