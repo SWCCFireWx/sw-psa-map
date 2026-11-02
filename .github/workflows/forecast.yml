@@ -11,6 +11,10 @@ on:
         description: "Models to run (comma list, blank = all)"
         required: false
         default: ""
+      rebuild_climo:
+        description: "Rebuild the FEMS climatology even if it is current (yes/no)"
+        required: false
+        default: "no"
   push:
     branches: [main]
     paths: ["data/**", "config/**"]   # edits to overrides, notes or thresholds trigger a fresh run (about 5 minutes)
@@ -37,6 +41,37 @@ jobs:
           python scripts/psa_pipeline.py fetch-psa --out docs/psa.new.geojson && mv docs/psa.new.geojson docs/psa.geojson || test -s docs/psa.geojson
       - uses: actions/upload-artifact@v4
         with: { name: psa, path: docs/psa.geojson }
+
+  # Runs before FEMS and the blend so percentiles and normals are always current.
+  # Checks in seconds; rebuilds (about 5 minutes) only when the climatology is missing,
+  # over a year old, built for different PSA boundaries, or a rebuild was requested.
+  climo:
+    needs: psa
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install pandas numpy shapely
+      - uses: actions/download-artifact@v4
+        with: { name: psa, path: docs }
+      - name: Is the climatology current?
+        id: need
+        run: python scripts/psa_pipeline.py climo-check ${{ github.event.inputs.rebuild_climo == 'yes' && '--force' || '' }}
+      - name: Rebuild climatology from the last 10 full years of FEMS data
+        if: steps.need.outputs.run
+        continue-on-error: true      # if FEMS is down, keep the existing climatology and carry on
+        run: |
+          y=$(( $(date +%Y) - 1 ))
+          python scripts/psa_pipeline.py fems-climo --start-year $(( y - 9 )) --end-year $y
+      - uses: actions/upload-artifact@v4
+        with:
+          name: climo
+          path: |
+            config/fems_climo.json
+            docs/fems_stations.json
+          if-no-files-found: ignore
 
   models:
     needs: psa
@@ -76,7 +111,8 @@ jobs:
           if-no-files-found: ignore
 
   fems:
-    needs: psa
+    needs: [psa, climo]
+    if: always() && needs.psa.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     continue-on-error: true
@@ -87,6 +123,9 @@ jobs:
       - run: pip install pandas numpy shapely
       - uses: actions/download-artifact@v4
         with: { name: psa, path: docs }
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with: { name: climo, path: . }
       - name: Pull ERC, BI and fuel moistures from FEMS
         continue-on-error: true
         run: python scripts/psa_pipeline.py fems
@@ -103,7 +142,7 @@ jobs:
           if-no-files-found: ignore
 
   blend:
-    needs: [psa, models, fems]
+    needs: [psa, climo, models, fems]
     if: always() && needs.psa.result == 'success'
     runs-on: ubuntu-latest
     steps:
@@ -118,6 +157,9 @@ jobs:
         with: { pattern: partial-*, path: partials, merge-multiple: true }
       - uses: actions/download-artifact@v4
         continue-on-error: true
+        with: { name: climo, path: . }
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
         with: { name: fems, path: docs }
       - name: Blend, classify, write outlook
         run: python scripts/psa_pipeline.py blend --partials partials
@@ -129,7 +171,7 @@ jobs:
         run: |
           git config user.name "psa-forecast-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add docs/*.json docs/*.csv docs/*.geojson 2>/dev/null || true
+          git add docs/*.json docs/*.csv docs/*.geojson config/fems_climo.json 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -q -m "Forecast update $(date -u +%Y-%m-%dT%H:%MZ)"
           # If another run saved in the meantime, keep this (newer) run's output files and your edits to everything else.
