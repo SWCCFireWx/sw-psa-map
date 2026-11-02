@@ -1,68 +1,21 @@
 name: Climatology
 
-# Builds, for each PSA from the last 10 years of FEMS data: BI and ERC percentiles,
-# day-of-year normals for every FEMS value, and peak-season temperature references.
-# Saved to config/fems_climo.json. Fully automatic: it checks every night and only
-# does the work when the file is missing, over a year old, or the PSA boundaries changed.
+# The FEMS climatology (BI/ERC percentiles, day-of-year normals, peak-season
+# temperatures) is now checked and, when needed, rebuilt at the start of every
+# Forecast run, so it is always current before the map is drawn.
+#
+# This workflow is only a manual button: it starts a Forecast run that rebuilds
+# the climatology even if it is current.
 on:
-  schedule:
-    - cron: "15 8 * * *"     # 1:15 am MST check
   workflow_dispatch:
-    inputs:
-      force: { description: "Rebuild even if current (yes/no)", default: "no" }
 
 permissions:
-  contents: write
-
-concurrency:
-  group: climatology
-  cancel-in-progress: false
+  actions: write
 
 jobs:
-  climo:
+  rebuild:
     runs-on: ubuntu-latest
-    timeout-minutes: 300
     steps:
-      - uses: actions/checkout@v4
-      - name: Is a rebuild needed?
-        id: need
-        run: |
-          python3 - <<'EOF' >> $GITHUB_OUTPUT
-          import json, os, hashlib, datetime
-          f, g = "config/fems_climo.json", "docs/psa.geojson"
-          force = "${{ inputs.force }}" == "yes"
-          why = None
-          if force: why = "forced"
-          elif not os.path.exists(f) or os.path.getsize(f) == 0: why = "missing"
-          else:
-              d = json.load(open(f))
-              age = (datetime.date.today() - datetime.date.fromisoformat(d.get("created", "2000-01-01"))).days
-              h = hashlib.md5(open(g, "rb").read()).hexdigest()[:12] if os.path.exists(g) else ""
-              if age > 365: why = "older than a year"
-              elif not any(isinstance(v, dict) and "normals" in v for v in d.values()): why = "no normals yet"
-              elif h and d.get("psa_hash") != h: why = "PSA boundaries changed"
-          print(f"run={'1' if why else ''}")
-          print(f"why={why or 'current'}")
-          EOF
-      - run: echo "Climatology rebuild needed - ${{ steps.need.outputs.why }}"
-      - uses: actions/setup-python@v5
-        if: steps.need.outputs.run
-        with: { python-version: "3.12" }
-      - if: steps.need.outputs.run
-        run: pip install pandas numpy shapely
-      - name: Download PSA boundaries if missing
-        if: steps.need.outputs.run
-        run: if [ ! -s docs/psa.geojson ]; then python scripts/psa_pipeline.py fetch-psa; fi
-      - name: Build percentiles from the last 10 full years
-        if: steps.need.outputs.run
-        run: |
-          y=$(( $(date +%Y) - 1 ))
-          python scripts/psa_pipeline.py fems-climo --start-year $(( y - 9 )) --end-year $y
-      - name: Commit
-        if: steps.need.outputs.run
-        run: |
-          git config user.name "psa-forecast-bot"
-          git config user.email "actions@users.noreply.github.com"
-          git add config/fems_climo.json docs/psa.geojson docs/fems_stations.json
-          git diff --cached --quiet || git commit -m "FEMS climatology update"
-          git pull --rebase -q && git push
+      - name: Start a Forecast run that rebuilds the climatology
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: gh workflow run forecast.yml --repo "${{ github.repository }}" --ref main -f rebuild_climo=yes
