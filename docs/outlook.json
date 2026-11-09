@@ -1,6 +1,6 @@
 {
  "run": {
-  "created": "2026-11-09T08:02Z",
+  "created": "2026-11-09T14:06Z",
   "models": [
    {
     "model": "AIFS",
@@ -8,27 +8,27 @@
    },
    {
     "model": "GEFS",
-    "init": "2026-11-09T00Z"
+    "init": "2026-11-09T06Z"
    },
    {
     "model": "GFS",
-    "init": "2026-11-09T00Z"
+    "init": "2026-11-09T06Z"
    },
    {
     "model": "HRRR",
-    "init": "2026-11-09T00Z"
+    "init": "2026-11-09T06Z"
    },
    {
     "model": "IFS",
-    "init": "2026-11-08T12Z"
+    "init": "2026-11-09T00Z"
    },
    {
     "model": "NBM",
-    "init": "2026-11-09T01Z"
+    "init": "2026-11-09T07Z"
    },
    {
     "model": "RAP",
-    "init": "2026-11-09T03Z"
+    "init": "2026-11-09T09Z"
    }
   ],
   "method": "Median of available models per PSA-day; spread = model min/max."
@@ -1231,7 +1231,7 @@
  },
  "discussion": "",
  "auto_discussion": [
-  "Today through Friday look quiet, with gusts under 30 mph and minimum humidity of 17-30%. Saturday brings gusts under 30 mph, minimum humidity of 26-50%, and wetting rain in southeast AZ and central and southern NM. Sunday brings gusts under 30 mph, minimum humidity of 38-53%, scattered thunderstorms in southeast NM, and wetting rain in central and southern NM. Temperatures cool through the period."
+  "Today through Sunday look quiet, with gusts under 35 mph and minimum humidity of 16-30%. Temperatures cool through the period."
  ],
  "fires": [],
  "thresholds": {
@@ -1303,7 +1303,7 @@
      null,
      null
     ],
-    "source": "NBM 2026-11-09T01Z"
+    "source": "NBM 2026-11-09T07Z"
    },
    "gust": {
     "label": "Peak wind gust",
@@ -1317,7 +1317,7 @@
      null,
      null
     ],
-    "source": "NBM 2026-11-09T01Z"
+    "source": "NBM 2026-11-09T07Z"
    },
    "dlp": {
     "label": "Dry lightning potential",
@@ -1331,7 +1331,7 @@
      "maps/dlp_d6.png",
      "maps/dlp_d7.png"
     ],
-    "source": "GFS 2026-11-09T00Z"
+    "source": "GFS 2026-11-09T06Z"
    },
    "qpf": {
     "label": "Precipitation",
@@ -1345,11 +1345,11 @@
      null,
      null
     ],
-    "source": "NBM 2026-11-09T01Z",
+    "source": "NBM 2026-11-09T07Z",
     "total": "maps/qpf_total.png"
    }
   },
-  "source": "NBM 2026-11-09T01Z",
+  "source": "NBM 2026-11-09T07Z",
   "featured": {
    "field": "rh",
    "day": 1,
