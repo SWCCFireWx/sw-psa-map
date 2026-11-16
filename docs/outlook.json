@@ -1,6 +1,6 @@
 {
  "run": {
-  "created": "2026-11-16T09:21Z",
+  "created": "2026-11-16T15:48Z",
   "models": [
    {
     "model": "AIFS",
@@ -8,27 +8,27 @@
    },
    {
     "model": "GEFS",
-    "init": "2026-11-16T00Z"
-   },
-   {
-    "model": "GFS",
-    "init": "2026-11-16T00Z"
-   },
-   {
-    "model": "HRRR",
     "init": "2026-11-16T06Z"
    },
    {
+    "model": "GFS",
+    "init": "2026-11-16T06Z"
+   },
+   {
+    "model": "HRRR",
+    "init": "2026-11-16T12Z"
+   },
+   {
     "model": "IFS",
-    "init": "2026-11-15T12Z"
+    "init": "2026-11-16T00Z"
    },
    {
     "model": "NBM",
-    "init": "2026-11-16T07Z"
+    "init": "2026-11-16T13Z"
    },
    {
     "model": "RAP",
-    "init": "2026-11-16T03Z"
+    "init": "2026-11-16T09Z"
    }
   ],
   "method": "Median of available models per PSA-day; spread = model min/max."
@@ -1231,8 +1231,8 @@
  },
  "discussion": "",
  "auto_discussion": [
-  "Today looks quiet, with gusts under 30 mph and minimum humidity of 33-63%. Tuesday brings gusts of 35 mph or more in northern and central AZ and northern and west-central NM, peaking near 47 mph, minimum humidity of 23-70%, and wetting rain in northern and central AZ. Wednesday and Thursday bring gusts of 35 mph or more in northern and central AZ and northern NM, peaking near 36 mph, and minimum humidity of 21-48%. Friday brings gusts of 35 mph or more in northeast and central AZ and much of NM, peaking near 53 mph, minimum humidity of 20-40%, and wetting rain in northern AZ.",
-  "Saturday and Sunday look quiet, with gusts under 35 mph and minimum humidity of 18-35%. Temperatures cool through the period."
+  "Today looks quiet, with gusts under 30 mph and minimum humidity of 33-63%. Tuesday brings gusts of 35 mph or more in northern and central AZ and northern and west-central NM, peaking near 48 mph, minimum humidity of 23-73%, and wetting rain in northern and central AZ. Wednesday looks quiet, with gusts under 35 mph and minimum humidity of 21-51%. Thursday brings gusts of 35 mph or more in northern and central AZ, peaking near 36 mph, and minimum humidity of 20-59%.",
+  "Friday brings gusts of 35 mph or more in northern and central AZ and much of NM, peaking near 52 mph, minimum humidity of 20-39%, and wetting rain in northern AZ. Saturday and Sunday look quiet, with gusts under 35 mph and minimum humidity of 18-32%. Temperatures cool through the period."
  ],
  "fires": [],
  "thresholds": {
@@ -1304,7 +1304,7 @@
      null,
      null
     ],
-    "source": "NBM 2026-11-16T07Z"
+    "source": "NBM 2026-11-16T13Z"
    },
    "gust": {
     "label": "Peak wind gust",
@@ -1318,7 +1318,7 @@
      null,
      null
     ],
-    "source": "NBM 2026-11-16T07Z"
+    "source": "NBM 2026-11-16T13Z"
    },
    "dlp": {
     "label": "Dry lightning potential",
@@ -1332,7 +1332,7 @@
      "maps/dlp_d6.png",
      "maps/dlp_d7.png"
     ],
-    "source": "GFS 2026-11-16T00Z"
+    "source": "GFS 2026-11-16T06Z"
    },
    "qpf": {
     "label": "Precipitation",
@@ -1346,11 +1346,11 @@
      null,
      null
     ],
-    "source": "NBM 2026-11-16T07Z",
+    "source": "NBM 2026-11-16T13Z",
     "total": "maps/qpf_total.png"
    }
   },
-  "source": "NBM 2026-11-16T07Z",
+  "source": "NBM 2026-11-16T13Z",
   "featured": {
    "field": "rh",
    "day": 1,
