@@ -1,6 +1,6 @@
 {
  "run": {
-  "created": "2026-11-21T07:44Z",
+  "created": "2026-11-21T13:46Z",
   "models": [
    {
     "model": "AIFS",
@@ -8,27 +8,27 @@
    },
    {
     "model": "GEFS",
-    "init": "2026-11-21T00Z"
+    "init": "2026-11-21T06Z"
    },
    {
     "model": "GFS",
-    "init": "2026-11-21T00Z"
+    "init": "2026-11-21T06Z"
    },
    {
     "model": "HRRR",
-    "init": "2026-11-21T00Z"
+    "init": "2026-11-21T06Z"
    },
    {
     "model": "IFS",
-    "init": "2026-11-20T12Z"
+    "init": "2026-11-21T00Z"
    },
    {
     "model": "NBM",
-    "init": "2026-11-21T01Z"
+    "init": "2026-11-21T07Z"
    },
    {
     "model": "RAP",
-    "init": "2026-11-21T03Z"
+    "init": "2026-11-21T09Z"
    }
   ],
   "method": "Median of available models per PSA-day; spread = model min/max."
@@ -49,8 +49,335 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 18.5 (fcst) is about the 30th percentile -> green.",
-     "Fuel moisture: 100-hr 19.4%, 1000-hr 19.1%; KBDI 2.5.",
+     "ERC 19.4 (fcst) is about the 31st percentile -> green.",
+     "Fuel moisture: 100-hr 19.0%, 1000-hr 19.0%; KBDI 2.5.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 31
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 21.2 (fcst) is about the 34th percentile -> green.",
+     "Fuel moisture: 100-hr 18.4%, 1000-hr 19.0%; KBDI 2.5.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 34
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 20.2 (fcst) is about the 33rd percentile -> green.",
+     "Fuel moisture: 100-hr 17.7%, 1000-hr 19.0%; KBDI 2.5.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 33
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 21.3 (fcst) is about the 34th percentile -> green.",
+     "Fuel moisture: 100-hr 17.0%, 1000-hr 19.0%; KBDI 2.5.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 34
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 22.3 (fcst) is about the 36th percentile -> green.",
+     "Fuel moisture: 100-hr 16.4%, 1000-hr 18.8%; KBDI 2.5.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 36
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 22.7 (fcst) is about the 37th percentile -> green.",
+     "Fuel moisture: 100-hr 15.8%, 1000-hr 18.6%; KBDI 2.5.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 37
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 23.8 (fcst) is about the 38th percentile -> green.",
+     "Fuel moisture: 100-hr 15.2%, 1000-hr 18.3%; KBDI 2.5.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 38
+   }
+  ],
+  "SW02": [
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 23.5 (fcst) is about the 24th percentile -> green.",
+     "Fuel moisture: 100-hr 17.2%, 1000-hr 18.4%; KBDI 56.5.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 24
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 25.1 (fcst) is about the 26th percentile -> green.",
+     "Fuel moisture: 100-hr 16.3%, 1000-hr 18.3%; KBDI 57.1.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 26
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 25.1 (fcst) is about the 26th percentile -> green.",
+     "Fuel moisture: 100-hr 15.6%, 1000-hr 18.0%; KBDI 57.8.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 26
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 26.2 (fcst) is about the 27th percentile -> green.",
+     "Fuel moisture: 100-hr 15.0%, 1000-hr 17.7%; KBDI 58.3.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 27
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 27.9 (fcst) is about the 29th percentile -> green.",
+     "Fuel moisture: 100-hr 14.3%, 1000-hr 17.4%; KBDI 58.7.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 29
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 28.9 (fcst) is about the 30th percentile -> green.",
+     "Fuel moisture: 100-hr 13.8%, 1000-hr 17.0%; KBDI 59.5.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 30
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 30.2 (fcst) is about the 31st percentile -> green.",
+     "Fuel moisture: 100-hr 13.4%, 1000-hr 16.6%; KBDI 60.3.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 31
+   }
+  ],
+  "SW03": [
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 27 (fcst) is about the 20th percentile -> green.",
+     "Fuel moisture: 100-hr 16.3%, 1000-hr 17.8%; KBDI 536.5.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 20
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 28.8 (fcst) is about the 22nd percentile -> green.",
+     "Fuel moisture: 100-hr 15.0%, 1000-hr 17.6%; KBDI 536.8.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 22
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 30.1 (fcst) is about the 23rd percentile -> green.",
+     "Fuel moisture: 100-hr 14.0%, 1000-hr 17.1%; KBDI 537.3.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 23
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 31.2 (fcst) is about the 24th percentile -> green.",
+     "Fuel moisture: 100-hr 13.5%, 1000-hr 16.6%; KBDI 537.7.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 24
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 32.8 (fcst) is about the 25th percentile -> green.",
+     "Fuel moisture: 100-hr 13.0%, 1000-hr 16.2%; KBDI 538.2.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 25
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 34.5 (fcst) is about the 26th percentile -> green.",
+     "Fuel moisture: 100-hr 12.7%, 1000-hr 15.7%; KBDI 538.7.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 26
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 35.8 (fcst) is about the 27th percentile -> green.",
+     "Fuel moisture: 100-hr 12.3%, 1000-hr 15.3%; KBDI 539.3.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 27
+   }
+  ],
+  "SW04": [
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 21.1 (fcst) is about the 35th percentile -> green.",
+     "Fuel moisture: 100-hr 17.2%, 1000-hr 18.7%; KBDI 23.5.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 35
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 23.3 (fcst) is about the 39th percentile -> green.",
+     "Fuel moisture: 100-hr 16.9%, 1000-hr 18.6%; KBDI 23.5.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 39
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 22.2 (fcst) is about the 37th percentile -> green.",
+     "Fuel moisture: 100-hr 16.4%, 1000-hr 18.4%; KBDI 23.5.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 37
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 23.2 (fcst) is about the 39th percentile -> green.",
+     "Fuel moisture: 100-hr 15.9%, 1000-hr 18.2%; KBDI 23.5.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 39
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 24.7 (fcst) is about the 41st percentile -> green.",
+     "Fuel moisture: 100-hr 15.4%, 1000-hr 18.0%; KBDI 23.5.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 41
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 24.7 (fcst) is about the 41st percentile -> green.",
+     "Fuel moisture: 100-hr 15.0%, 1000-hr 17.8%; KBDI 23.5.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 41
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 25.3 (fcst) is about the 42nd percentile -> green.",
+     "Fuel moisture: 100-hr 14.7%, 1000-hr 17.6%; KBDI 23.5.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 42
+   }
+  ],
+  "SW05": [
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 16.9 (fcst) is about the 27th percentile -> green.",
+     "Fuel moisture: 100-hr 19.4%, 1000-hr 20.7%; KBDI 3.1.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 27
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 18.4 (fcst) is about the 30th percentile -> green.",
+     "Fuel moisture: 100-hr 18.5%, 1000-hr 20.7%; KBDI 3.3.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 30
@@ -61,7 +388,7 @@
     "all_triggers": [],
     "why": [
      "ERC 17.8 (fcst) is about the 29th percentile -> green.",
-     "Fuel moisture: 100-hr 18.9%, 1000-hr 19.2%; KBDI 2.5.",
+     "Fuel moisture: 100-hr 17.7%, 1000-hr 20.5%; KBDI 3.7.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 29
@@ -71,120 +398,8 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 15.8 (fcst) is about the 25th percentile -> green.",
-     "Fuel moisture: 100-hr 18.6%, 1000-hr 19.2%; KBDI 2.5.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 25
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 18.6 (fcst) is about the 30th percentile -> green.",
-     "Fuel moisture: 100-hr 18.4%, 1000-hr 19.2%; KBDI 2.5.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 30
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 20.2 (fcst) is about the 33rd percentile -> green.",
-     "Fuel moisture: 100-hr 18.0%, 1000-hr 19.1%; KBDI 2.5.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 33
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 18.7 (fcst) is about the 30th percentile -> green.",
-     "Fuel moisture: 100-hr 17.6%, 1000-hr 19.1%; KBDI 2.5.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 30
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 17 (fcst) is about the 27th percentile -> green.",
-     "Fuel moisture: 100-hr 17.5%, 1000-hr 19.0%; KBDI 2.5.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 27
-   }
-  ],
-  "SW02": [
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 23.8 (fcst) is about the 25th percentile -> green.",
-     "Fuel moisture: 100-hr 16.9%, 1000-hr 18.4%; KBDI 56.5.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 25
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 25.5 (fcst) is about the 27th percentile -> green.",
-     "Fuel moisture: 100-hr 15.9%, 1000-hr 18.2%; KBDI 56.9.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 27
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 26.1 (fcst) is about the 27th percentile -> green.",
-     "Fuel moisture: 100-hr 15.0%, 1000-hr 17.9%; KBDI 57.5.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 27
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 27.6 (fcst) is about the 29th percentile -> green.",
-     "Fuel moisture: 100-hr 14.4%, 1000-hr 17.5%; KBDI 57.8.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 29
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 29 (fcst) is about the 30th percentile -> green.",
-     "Fuel moisture: 100-hr 13.8%, 1000-hr 17.1%; KBDI 58.1.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 30
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 29.7 (fcst) is about the 31st percentile -> green.",
-     "Fuel moisture: 100-hr 13.4%, 1000-hr 16.7%; KBDI 58.6.",
+     "ERC 19.5 (fcst) is about the 31st percentile -> green.",
+     "Fuel moisture: 100-hr 16.9%, 1000-hr 20.2%; KBDI 3.9.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 31
@@ -194,100 +409,19 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 30.9 (fcst) is about the 32nd percentile -> green.",
-     "Fuel moisture: 100-hr 13.1%, 1000-hr 16.4%; KBDI 59.3.",
+     "ERC 21.3 (fcst) is about the 34th percentile -> green.",
+     "Fuel moisture: 100-hr 16.1%, 1000-hr 19.8%; KBDI 4.1.",
      "Fuels too moist for High Risk triggers."
     ],
-    "erc_pct": 32
-   }
-  ],
-  "SW03": [
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 28.4 (fcst) is about the 22nd percentile -> green.",
-     "Fuel moisture: 100-hr 15.3%, 1000-hr 17.6%; KBDI 536.7.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 22
+    "erc_pct": 34
    },
    {
     "category": "green",
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 30.6 (fcst) is about the 23rd percentile -> green.",
-     "Fuel moisture: 100-hr 14.1%, 1000-hr 17.2%; KBDI 537.0.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 23
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 32.2 (fcst) is about the 24th percentile -> green.",
-     "Fuel moisture: 100-hr 13.2%, 1000-hr 16.6%; KBDI 537.5.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 24
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 33.6 (fcst) is about the 25th percentile -> green.",
-     "Fuel moisture: 100-hr 12.6%, 1000-hr 16.1%; KBDI 537.8.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 25
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 35.2 (fcst) is about the 27th percentile -> green.",
-     "Fuel moisture: 100-hr 12.2%, 1000-hr 15.6%; KBDI 538.3.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 27
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 36.1 (fcst) is about the 27th percentile -> green.",
-     "Fuel moisture: 100-hr 12.0%, 1000-hr 15.2%; KBDI 538.8.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 27
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 37.3 (fcst) is about the 28th percentile -> green.",
-     "Fuel moisture: 100-hr 11.9%, 1000-hr 14.8%; KBDI 539.5.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 28
-   }
-  ],
-  "SW04": [
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 21.9 (fcst) is about the 36th percentile -> green.",
-     "Fuel moisture: 100-hr 16.9%, 1000-hr 18.6%; KBDI 23.2.",
+     "ERC 22.2 (fcst) is about the 36th percentile -> green.",
+     "Fuel moisture: 100-hr 15.4%, 1000-hr 19.4%; KBDI 4.4.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 36
@@ -297,145 +431,11 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 23.5 (fcst) is about the 39th percentile -> green.",
-     "Fuel moisture: 100-hr 16.4%, 1000-hr 18.5%; KBDI 23.2.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 39
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 23.1 (fcst) is about the 38th percentile -> green.",
-     "Fuel moisture: 100-hr 15.9%, 1000-hr 18.3%; KBDI 23.2.",
+     "ERC 23.3 (fcst) is about the 38th percentile -> green.",
+     "Fuel moisture: 100-hr 14.9%, 1000-hr 18.9%; KBDI 4.7.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 38
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 24.2 (fcst) is about the 40th percentile -> green.",
-     "Fuel moisture: 100-hr 15.5%, 1000-hr 18.1%; KBDI 23.2.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 40
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 25 (fcst) is about the 42nd percentile -> green.",
-     "Fuel moisture: 100-hr 15.1%, 1000-hr 17.9%; KBDI 23.2.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 42
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 24.7 (fcst) is about the 41st percentile -> green.",
-     "Fuel moisture: 100-hr 14.7%, 1000-hr 17.7%; KBDI 23.2.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 41
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 25.8 (fcst) is about the 43rd percentile -> green.",
-     "Fuel moisture: 100-hr 14.5%, 1000-hr 17.4%; KBDI 23.2.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 43
-   }
-  ],
-  "SW05": [
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 17.2 (fcst) is about the 28th percentile -> green.",
-     "Fuel moisture: 100-hr 19.1%, 1000-hr 20.7%; KBDI 3.0.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 28
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 18.8 (fcst) is about the 30th percentile -> green.",
-     "Fuel moisture: 100-hr 18.0%, 1000-hr 20.6%; KBDI 3.2.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 30
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 18.8 (fcst) is about the 30th percentile -> green.",
-     "Fuel moisture: 100-hr 17.1%, 1000-hr 20.3%; KBDI 3.6.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 30
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 20.7 (fcst) is about the 33rd percentile -> green.",
-     "Fuel moisture: 100-hr 16.4%, 1000-hr 19.9%; KBDI 3.8.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 33
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 22 (fcst) is about the 35th percentile -> green.",
-     "Fuel moisture: 100-hr 15.7%, 1000-hr 19.6%; KBDI 4.0.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 35
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 22.3 (fcst) is about the 36th percentile -> green.",
-     "Fuel moisture: 100-hr 15.2%, 1000-hr 19.2%; KBDI 4.2.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 36
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 22.8 (fcst) is about the 37th percentile -> green.",
-     "Fuel moisture: 100-hr 15.0%, 1000-hr 18.9%; KBDI 4.4.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 37
    }
   ],
   "SW06N": [
@@ -444,8 +444,19 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 20.4 (fcst) is about the 20th percentile -> green.",
-     "Fuel moisture: 100-hr 17.9%, 1000-hr 19.8%; KBDI 104.1.",
+     "ERC 19.2 (fcst) is about the 18th percentile -> green.",
+     "Fuel moisture: 100-hr 18.8%, 1000-hr 20.1%; KBDI 104.1.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 18
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 21.1 (fcst) is about the 20th percentile -> green.",
+     "Fuel moisture: 100-hr 17.7%, 1000-hr 20.0%; KBDI 105.1.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 20
@@ -455,8 +466,8 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 22.3 (fcst) is about the 21st percentile -> green.",
-     "Fuel moisture: 100-hr 16.8%, 1000-hr 19.5%; KBDI 105.0.",
+     "ERC 21.4 (fcst) is about the 21st percentile -> green.",
+     "Fuel moisture: 100-hr 16.7%, 1000-hr 19.6%; KBDI 106.4.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 21
@@ -466,8 +477,8 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 23 (fcst) is about the 22nd percentile -> green.",
-     "Fuel moisture: 100-hr 16.0%, 1000-hr 19.1%; KBDI 106.3.",
+     "ERC 23.1 (fcst) is about the 22nd percentile -> green.",
+     "Fuel moisture: 100-hr 15.9%, 1000-hr 19.2%; KBDI 107.6.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 22
@@ -477,8 +488,8 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 25.1 (fcst) is about the 24th percentile -> green.",
-     "Fuel moisture: 100-hr 15.2%, 1000-hr 18.6%; KBDI 107.2.",
+     "ERC 25 (fcst) is about the 24th percentile -> green.",
+     "Fuel moisture: 100-hr 15.1%, 1000-hr 18.7%; KBDI 108.7.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 24
@@ -488,30 +499,19 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 26.6 (fcst) is about the 26th percentile -> green.",
-     "Fuel moisture: 100-hr 14.5%, 1000-hr 18.1%; KBDI 108.3.",
+     "ERC 26.4 (fcst) is about the 25th percentile -> green.",
+     "Fuel moisture: 100-hr 14.5%, 1000-hr 18.1%; KBDI 109.8.",
      "Fuels too moist for High Risk triggers."
     ],
-    "erc_pct": 26
+    "erc_pct": 25
    },
    {
     "category": "green",
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 27.4 (fcst) is about the 26th percentile -> green.",
-     "Fuel moisture: 100-hr 14.2%, 1000-hr 17.7%; KBDI 109.4.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 26
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 28.5 (fcst) is about the 27th percentile -> green.",
-     "Fuel moisture: 100-hr 13.9%, 1000-hr 17.3%; KBDI 110.5.",
+     "ERC 27.8 (fcst) is about the 27th percentile -> green.",
+     "Fuel moisture: 100-hr 14.1%, 1000-hr 17.7%; KBDI 110.9.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 27
@@ -523,63 +523,63 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 23.3 (fcst) is about the 27th percentile -> green.",
-     "Fuel moisture: 100-hr 16.5%, 1000-hr 18.8%; KBDI 120.2.",
+     "ERC 21.9 (fcst) is about the 25th percentile -> green.",
+     "Fuel moisture: 100-hr 17.1%, 1000-hr 19.0%; KBDI 120.3.",
      "Fuels too moist for High Risk triggers."
     ],
-    "erc_pct": 27
+    "erc_pct": 25
    },
    {
     "category": "green",
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 24.9 (fcst) is about the 29th percentile -> green.",
-     "Fuel moisture: 100-hr 15.7%, 1000-hr 18.5%; KBDI 120.9.",
+     "ERC 23.7 (fcst) is about the 28th percentile -> green.",
+     "Fuel moisture: 100-hr 16.4%, 1000-hr 18.8%; KBDI 120.9.",
      "Fuels too moist for High Risk triggers."
     ],
-    "erc_pct": 29
+    "erc_pct": 28
    },
    {
     "category": "green",
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 26 (fcst) is about the 30th percentile -> green.",
-     "Fuel moisture: 100-hr 14.9%, 1000-hr 18.1%; KBDI 121.8.",
+     "ERC 24.5 (fcst) is about the 28th percentile -> green.",
+     "Fuel moisture: 100-hr 15.6%, 1000-hr 18.4%; KBDI 121.7.",
      "Fuels too moist for High Risk triggers."
     ],
-    "erc_pct": 30
+    "erc_pct": 28
    },
    {
     "category": "green",
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 27.9 (fcst) is about the 32nd percentile -> green.",
-     "Fuel moisture: 100-hr 14.3%, 1000-hr 17.7%; KBDI 122.5.",
+     "ERC 26.5 (fcst) is about the 31st percentile -> green.",
+     "Fuel moisture: 100-hr 14.9%, 1000-hr 18.1%; KBDI 122.5.",
      "Fuels too moist for High Risk triggers."
     ],
-    "erc_pct": 32
+    "erc_pct": 31
    },
    {
     "category": "green",
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 29.4 (fcst) is about the 34th percentile -> green.",
-     "Fuel moisture: 100-hr 13.7%, 1000-hr 17.3%; KBDI 123.1.",
+     "ERC 28.2 (fcst) is about the 33rd percentile -> green.",
+     "Fuel moisture: 100-hr 14.1%, 1000-hr 17.7%; KBDI 123.0.",
      "Fuels too moist for High Risk triggers."
     ],
-    "erc_pct": 34
+    "erc_pct": 33
    },
    {
     "category": "green",
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 30.1 (fcst) is about the 35th percentile -> green.",
-     "Fuel moisture: 100-hr 13.3%, 1000-hr 16.9%; KBDI 123.8.",
+     "ERC 29.7 (fcst) is about the 35th percentile -> green.",
+     "Fuel moisture: 100-hr 13.5%, 1000-hr 17.2%; KBDI 123.7.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 35
@@ -589,8 +589,8 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 30.7 (fcst) is about the 36th percentile -> green.",
-     "Fuel moisture: 100-hr 13.0%, 1000-hr 16.7%; KBDI 124.4.",
+     "ERC 30.9 (fcst) is about the 36th percentile -> green.",
+     "Fuel moisture: 100-hr 13.1%, 1000-hr 16.8%; KBDI 124.5.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 36
@@ -602,63 +602,8 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 21.5 (fcst) is about the 34th percentile -> green.",
-     "Fuel moisture: 100-hr 17.4%, 1000-hr 18.5%; KBDI 19.1.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 34
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 21.2 (fcst) is about the 33rd percentile -> green.",
-     "Fuel moisture: 100-hr 17.1%, 1000-hr 18.5%; KBDI 19.1.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 33
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 18.1 (fcst) is about the 28th percentile -> green.",
-     "Fuel moisture: 100-hr 16.8%, 1000-hr 18.4%; KBDI 19.1.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 28
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 19.1 (fcst) is about the 30th percentile -> green.",
-     "Fuel moisture: 100-hr 16.9%, 1000-hr 18.4%; KBDI 19.1.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 30
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 20.5 (fcst) is about the 32nd percentile -> green.",
-     "Fuel moisture: 100-hr 17.0%, 1000-hr 18.2%; KBDI 19.1.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 32
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
      "ERC 20.2 (fcst) is about the 32nd percentile -> green.",
-     "Fuel moisture: 100-hr 16.9%, 1000-hr 18.2%; KBDI 19.1.",
+     "Fuel moisture: 100-hr 17.7%, 1000-hr 18.5%; KBDI 19.6.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 32
@@ -668,21 +613,8 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 21.6 (fcst) is about the 34th percentile -> green.",
-     "Fuel moisture: 100-hr 16.7%, 1000-hr 18.1%; KBDI 19.1.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 34
-   }
-  ],
-  "SW08": [
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 22.6 (fcst) is about the 35th percentile -> green.",
-     "Fuel moisture: 100-hr 16.8%, 1000-hr 18.7%; KBDI 14.6.",
+     "ERC 22.7 (fcst) is about the 35th percentile -> green.",
+     "Fuel moisture: 100-hr 17.2%, 1000-hr 18.5%; KBDI 19.6.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 35
@@ -692,8 +624,41 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
+     "ERC 22.4 (fcst) is about the 35th percentile -> green.",
+     "Fuel moisture: 100-hr 16.6%, 1000-hr 18.4%; KBDI 19.6.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 35
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 20.4 (fcst) is about the 32nd percentile -> green.",
+     "Fuel moisture: 100-hr 16.4%, 1000-hr 18.3%; KBDI 19.6.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 32
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 23.2 (fcst) is about the 36th percentile -> green.",
+     "Fuel moisture: 100-hr 16.0%, 1000-hr 18.1%; KBDI 19.6.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 36
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
      "ERC 24 (fcst) is about the 38th percentile -> green.",
-     "Fuel moisture: 100-hr 16.2%, 1000-hr 18.5%; KBDI 14.6.",
+     "Fuel moisture: 100-hr 15.8%, 1000-hr 18.0%; KBDI 19.6.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 38
@@ -703,41 +668,65 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 24 (fcst) is about the 38th percentile -> green.",
-     "Fuel moisture: 100-hr 15.6%, 1000-hr 18.3%; KBDI 14.9.",
+     "ERC 24.5 (fcst) is about the 38th percentile -> green.",
+     "Fuel moisture: 100-hr 15.5%, 1000-hr 17.8%; KBDI 19.6.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 38
-   },
+   }
+  ],
+  "SW08": [
    {
     "category": "green",
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 25.7 (fcst) is about the 40th percentile -> green.",
-     "Fuel moisture: 100-hr 15.1%, 1000-hr 18.0%; KBDI 15.0.",
+     "ERC 21.7 (fcst) is about the 34th percentile -> green.",
+     "Fuel moisture: 100-hr 17.1%, 1000-hr 18.7%; KBDI 14.9.",
      "Fuels too moist for High Risk triggers."
     ],
-    "erc_pct": 40
+    "erc_pct": 34
    },
    {
     "category": "green",
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 26.4 (fcst) is about the 41st percentile -> green.",
-     "Fuel moisture: 100-hr 14.6%, 1000-hr 17.7%; KBDI 15.0.",
+     "ERC 23.6 (fcst) is about the 37th percentile -> green.",
+     "Fuel moisture: 100-hr 16.5%, 1000-hr 18.6%; KBDI 14.9.",
      "Fuels too moist for High Risk triggers."
     ],
-    "erc_pct": 41
+    "erc_pct": 37
    },
    {
     "category": "green",
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 26.4 (fcst) is about the 41st percentile -> green.",
-     "Fuel moisture: 100-hr 14.2%, 1000-hr 17.5%; KBDI 15.1.",
+     "ERC 23.3 (fcst) is about the 36th percentile -> green.",
+     "Fuel moisture: 100-hr 15.9%, 1000-hr 18.4%; KBDI 15.1.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 36
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 25.1 (fcst) is about the 39th percentile -> green.",
+     "Fuel moisture: 100-hr 15.3%, 1000-hr 18.1%; KBDI 15.4.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 39
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 26.3 (fcst) is about the 41st percentile -> green.",
+     "Fuel moisture: 100-hr 14.8%, 1000-hr 17.8%; KBDI 15.5.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 41
@@ -748,7 +737,18 @@
     "all_triggers": [],
     "why": [
      "ERC 26.9 (fcst) is about the 42nd percentile -> green.",
-     "Fuel moisture: 100-hr 14.0%, 1000-hr 17.3%; KBDI 15.1.",
+     "Fuel moisture: 100-hr 14.3%, 1000-hr 17.6%; KBDI 15.7.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 42
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 27.1 (fcst) is about the 42nd percentile -> green.",
+     "Fuel moisture: 100-hr 14.0%, 1000-hr 17.3%; KBDI 15.9.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 42
@@ -760,8 +760,30 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 24.3 (fcst) is about the 26th percentile -> green.",
-     "Fuel moisture: 100-hr 16.1%, 1000-hr 18.8%; KBDI 172.2.",
+     "ERC 22.9 (fcst) is about the 24th percentile -> green.",
+     "Fuel moisture: 100-hr 16.7%, 1000-hr 18.9%; KBDI 172.3.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 24
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 24.8 (fcst) is about the 26th percentile -> green.",
+     "Fuel moisture: 100-hr 15.8%, 1000-hr 18.7%; KBDI 173.0.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 26
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 24.7 (fcst) is about the 26th percentile -> green.",
+     "Fuel moisture: 100-hr 15.1%, 1000-hr 18.3%; KBDI 173.3.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 26
@@ -772,7 +794,7 @@
     "all_triggers": [],
     "why": [
      "ERC 25.8 (fcst) is about the 27th percentile -> green.",
-     "Fuel moisture: 100-hr 15.2%, 1000-hr 18.4%; KBDI 172.5.",
+     "Fuel moisture: 100-hr 14.6%, 1000-hr 17.9%; KBDI 173.8.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 27
@@ -782,44 +804,11 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 25.9 (fcst) is about the 28th percentile -> green.",
-     "Fuel moisture: 100-hr 14.6%, 1000-hr 18.1%; KBDI 172.8.",
+     "ERC 26.5 (fcst) is about the 28th percentile -> green.",
+     "Fuel moisture: 100-hr 14.3%, 1000-hr 17.6%; KBDI 174.0.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 28
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 26.8 (fcst) is about the 29th percentile -> green.",
-     "Fuel moisture: 100-hr 14.2%, 1000-hr 17.7%; KBDI 173.2.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 29
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 26.7 (fcst) is about the 28th percentile -> green.",
-     "Fuel moisture: 100-hr 14.0%, 1000-hr 17.4%; KBDI 173.3.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 28
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 27.2 (fcst) is about the 29th percentile -> green.",
-     "Fuel moisture: 100-hr 13.9%, 1000-hr 17.1%; KBDI 173.3.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 29
    },
    {
     "category": "green",
@@ -827,10 +816,21 @@
     "all_triggers": [],
     "why": [
      "ERC 27.6 (fcst) is about the 29th percentile -> green.",
-     "Fuel moisture: 100-hr 13.9%, 1000-hr 16.9%; KBDI 173.3.",
+     "Fuel moisture: 100-hr 14.0%, 1000-hr 17.3%; KBDI 174.0.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 29
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 28.2 (fcst) is about the 30th percentile -> green.",
+     "Fuel moisture: 100-hr 13.8%, 1000-hr 17.0%; KBDI 174.3.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 30
    }
   ],
   "SW10": [
@@ -839,30 +839,41 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 23.6 (fcst) is about the 45th percentile -> green.",
-     "Fuel moisture: 100-hr 16.9%, 1000-hr 17.6%; KBDI 7.0.",
+     "ERC 22.7 (fcst) is about the 44th percentile -> green.",
+     "Fuel moisture: 100-hr 17.0%, 1000-hr 17.6%; KBDI 7.6.",
      "Fuels too moist for High Risk triggers."
     ],
-    "erc_pct": 45
+    "erc_pct": 44
    },
    {
     "category": "green",
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 22.2 (fcst) is about the 43rd percentile -> green.",
-     "Fuel moisture: 100-hr 16.7%, 1000-hr 17.6%; KBDI 7.0.",
+     "ERC 22.8 (fcst) is about the 44th percentile -> green.",
+     "Fuel moisture: 100-hr 16.6%, 1000-hr 17.6%; KBDI 7.6.",
      "Fuels too moist for High Risk triggers."
     ],
-    "erc_pct": 43
+    "erc_pct": 44
    },
    {
     "category": "green",
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 20.6 (fcst) is about the 40th percentile -> green.",
-     "Fuel moisture: 100-hr 16.4%, 1000-hr 17.6%; KBDI 7.0.",
+     "ERC 22.8 (fcst) is about the 44th percentile -> green.",
+     "Fuel moisture: 100-hr 16.2%, 1000-hr 17.6%; KBDI 7.6.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 44
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 20.8 (fcst) is about the 40th percentile -> green.",
+     "Fuel moisture: 100-hr 16.3%, 1000-hr 17.5%; KBDI 7.6.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 40
@@ -872,44 +883,33 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 20.3 (fcst) is about the 39th percentile -> green.",
-     "Fuel moisture: 100-hr 16.6%, 1000-hr 17.6%; KBDI 7.0.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 39
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 21.7 (fcst) is about the 42nd percentile -> green.",
-     "Fuel moisture: 100-hr 16.7%, 1000-hr 17.6%; KBDI 7.0.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 42
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 21.9 (fcst) is about the 42nd percentile -> green.",
-     "Fuel moisture: 100-hr 16.7%, 1000-hr 17.5%; KBDI 7.0.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 42
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 22.9 (fcst) is about the 44th percentile -> green.",
-     "Fuel moisture: 100-hr 16.6%, 1000-hr 17.5%; KBDI 7.0.",
+     "ERC 22.7 (fcst) is about the 44th percentile -> green.",
+     "Fuel moisture: 100-hr 16.2%, 1000-hr 17.5%; KBDI 7.6.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 44
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 23.4 (fcst) is about the 45th percentile -> green.",
+     "Fuel moisture: 100-hr 16.2%, 1000-hr 17.4%; KBDI 7.6.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 45
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 23.7 (fcst) is about the 46th percentile -> green.",
+     "Fuel moisture: 100-hr 16.0%, 1000-hr 17.3%; KBDI 7.6.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 46
    }
   ],
   "SW11": [
@@ -918,19 +918,19 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 16.9 (fcst) is about the 21st percentile -> green.",
+     "ERC 16.1 (fcst) is about the 20th percentile -> green.",
      "Fuel moisture: 100-hr 19.1%, 1000-hr 21.5%; KBDI 39.2.",
      "Fuels too moist for High Risk triggers."
     ],
-    "erc_pct": 21
+    "erc_pct": 20
    },
    {
     "category": "green",
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 18.4 (fcst) is about the 23rd percentile -> green.",
-     "Fuel moisture: 100-hr 17.9%, 1000-hr 21.3%; KBDI 39.2.",
+     "ERC 18.3 (fcst) is about the 23rd percentile -> green.",
+     "Fuel moisture: 100-hr 17.9%, 1000-hr 21.2%; KBDI 39.2.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 23
@@ -940,8 +940,8 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 18.1 (fcst) is about the 23rd percentile -> green.",
-     "Fuel moisture: 100-hr 17.0%, 1000-hr 20.9%; KBDI 39.2.",
+     "ERC 18.3 (fcst) is about the 23rd percentile -> green.",
+     "Fuel moisture: 100-hr 16.9%, 1000-hr 20.8%; KBDI 39.2.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 23
@@ -951,7 +951,7 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 19.2 (fcst) is about the 24th percentile -> green.",
+     "ERC 19.4 (fcst) is about the 24th percentile -> green.",
      "Fuel moisture: 100-hr 16.3%, 1000-hr 20.4%; KBDI 39.2.",
      "Fuels too moist for High Risk triggers."
     ],
@@ -962,33 +962,33 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 19.8 (fcst) is about the 25th percentile -> green.",
-     "Fuel moisture: 100-hr 15.9%, 1000-hr 20.0%; KBDI 39.2.",
+     "ERC 20.7 (fcst) is about the 26th percentile -> green.",
+     "Fuel moisture: 100-hr 15.7%, 1000-hr 19.9%; KBDI 39.2.",
      "Fuels too moist for High Risk triggers."
     ],
-    "erc_pct": 25
+    "erc_pct": 26
    },
    {
     "category": "green",
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 19.7 (fcst) is about the 25th percentile -> green.",
-     "Fuel moisture: 100-hr 15.5%, 1000-hr 19.7%; KBDI 39.2.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 25
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 21.4 (fcst) is about the 27th percentile -> green.",
-     "Fuel moisture: 100-hr 15.3%, 1000-hr 19.3%; KBDI 39.2.",
+     "ERC 21.3 (fcst) is about the 27th percentile -> green.",
+     "Fuel moisture: 100-hr 15.3%, 1000-hr 19.5%; KBDI 39.2.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 27
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 21.1 (fcst) is about the 26th percentile -> green.",
+     "Fuel moisture: 100-hr 15.1%, 1000-hr 19.2%; KBDI 39.2.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 26
    }
   ],
   "SW12": [
@@ -997,8 +997,19 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 20.8 (fcst) is about the 32nd percentile -> green.",
-     "Fuel moisture: 100-hr 17.6%, 1000-hr 20.1%; KBDI 83.9.",
+     "ERC 19.6 (fcst) is about the 30th percentile -> green.",
+     "Fuel moisture: 100-hr 18.1%, 1000-hr 20.2%; KBDI 83.7.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 30
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 21.4 (fcst) is about the 32nd percentile -> green.",
+     "Fuel moisture: 100-hr 16.9%, 1000-hr 19.9%; KBDI 84.4.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 32
@@ -1008,19 +1019,8 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 22 (fcst) is about the 33rd percentile -> green.",
-     "Fuel moisture: 100-hr 16.5%, 1000-hr 19.8%; KBDI 84.5.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 33
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 21.3 (fcst) is about the 32nd percentile -> green.",
-     "Fuel moisture: 100-hr 15.8%, 1000-hr 19.4%; KBDI 84.5.",
+     "ERC 21.2 (fcst) is about the 32nd percentile -> green.",
+     "Fuel moisture: 100-hr 16.1%, 1000-hr 19.6%; KBDI 84.5.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 32
@@ -1030,8 +1030,8 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 21.8 (fcst) is about the 33rd percentile -> green.",
-     "Fuel moisture: 100-hr 15.4%, 1000-hr 19.0%; KBDI 84.6.",
+     "ERC 22.1 (fcst) is about the 33rd percentile -> green.",
+     "Fuel moisture: 100-hr 15.6%, 1000-hr 19.1%; KBDI 84.8.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 33
@@ -1041,33 +1041,33 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 21.8 (fcst) is about the 33rd percentile -> green.",
-     "Fuel moisture: 100-hr 15.2%, 1000-hr 18.7%; KBDI 84.6.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 33
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 22.3 (fcst) is about the 34th percentile -> green.",
-     "Fuel moisture: 100-hr 15.1%, 1000-hr 18.5%; KBDI 84.6.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 34
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 22.8 (fcst) is about the 35th percentile -> green.",
-     "Fuel moisture: 100-hr 15.1%, 1000-hr 18.3%; KBDI 84.6.",
+     "ERC 22.9 (fcst) is about the 35th percentile -> green.",
+     "Fuel moisture: 100-hr 15.2%, 1000-hr 18.8%; KBDI 84.8.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 35
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 23.9 (fcst) is about the 36th percentile -> green.",
+     "Fuel moisture: 100-hr 14.8%, 1000-hr 18.4%; KBDI 84.9.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 36
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 23.8 (fcst) is about the 36th percentile -> green.",
+     "Fuel moisture: 100-hr 14.6%, 1000-hr 18.2%; KBDI 85.1.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 36
    }
   ],
   "SW13": [
@@ -1076,8 +1076,30 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 16.9 (fcst) is about the 23rd percentile -> green.",
-     "Fuel moisture: 100-hr 20.0%, 1000-hr 21.0%; KBDI 258.5.",
+     "ERC 16 (fcst) is about the 22nd percentile -> green.",
+     "Fuel moisture: 100-hr 20.7%, 1000-hr 21.1%; KBDI 258.0.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 22
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 16.4 (fcst) is about the 22nd percentile -> green.",
+     "Fuel moisture: 100-hr 19.4%, 1000-hr 21.1%; KBDI 259.0.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 22
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 16.7 (fcst) is about the 23rd percentile -> green.",
+     "Fuel moisture: 100-hr 18.3%, 1000-hr 21.1%; KBDI 259.0.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 23
@@ -1087,8 +1109,8 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 17 (fcst) is about the 23rd percentile -> green.",
-     "Fuel moisture: 100-hr 18.8%, 1000-hr 21.0%; KBDI 258.5.",
+     "ERC 17.2 (fcst) is about the 23rd percentile -> green.",
+     "Fuel moisture: 100-hr 17.5%, 1000-hr 20.8%; KBDI 259.0.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 23
@@ -1098,30 +1120,8 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 17 (fcst) is about the 23rd percentile -> green.",
-     "Fuel moisture: 100-hr 17.9%, 1000-hr 20.8%; KBDI 258.5.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 23
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 17 (fcst) is about the 23rd percentile -> green.",
-     "Fuel moisture: 100-hr 17.3%, 1000-hr 20.5%; KBDI 258.5.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 23
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 17.7 (fcst) is about the 24th percentile -> green.",
-     "Fuel moisture: 100-hr 16.8%, 1000-hr 20.2%; KBDI 258.5.",
+     "ERC 18 (fcst) is about the 24th percentile -> green.",
+     "Fuel moisture: 100-hr 17.0%, 1000-hr 20.4%; KBDI 259.0.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 24
@@ -1131,22 +1131,22 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 18.5 (fcst) is about the 25th percentile -> green.",
-     "Fuel moisture: 100-hr 16.5%, 1000-hr 19.8%; KBDI 258.5.",
+     "ERC 18.9 (fcst) is about the 26th percentile -> green.",
+     "Fuel moisture: 100-hr 16.6%, 1000-hr 20.1%; KBDI 259.0.",
      "Fuels too moist for High Risk triggers."
     ],
-    "erc_pct": 25
+    "erc_pct": 26
    },
    {
     "category": "green",
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 20.2 (fcst) is about the 27th percentile -> green.",
-     "Fuel moisture: 100-hr 16.3%, 1000-hr 19.6%; KBDI 258.5.",
+     "ERC 18.6 (fcst) is about the 25th percentile -> green.",
+     "Fuel moisture: 100-hr 16.4%, 1000-hr 19.8%; KBDI 259.0.",
      "Fuels too moist for High Risk triggers."
     ],
-    "erc_pct": 27
+    "erc_pct": 25
    }
   ],
   "SW14N": [
@@ -1155,63 +1155,8 @@
     "trigger": null,
     "all_triggers": [],
     "why": [
-     "ERC 16 (fcst) is about the 19th percentile -> green.",
-     "Fuel moisture: 100-hr 20.2%, 1000-hr 21.6%; KBDI 119.0.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 19
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 17 (fcst) is about the 20th percentile -> green.",
-     "Fuel moisture: 100-hr 18.3%, 1000-hr 21.4%; KBDI 120.0.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 20
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 16.7 (fcst) is about the 19th percentile -> green.",
-     "Fuel moisture: 100-hr 17.4%, 1000-hr 21.0%; KBDI 120.0.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 19
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 16.7 (fcst) is about the 19th percentile -> green.",
-     "Fuel moisture: 100-hr 17.2%, 1000-hr 20.5%; KBDI 120.0.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 19
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 16.3 (fcst) is about the 19th percentile -> green.",
-     "Fuel moisture: 100-hr 17.2%, 1000-hr 20.2%; KBDI 120.0.",
-     "Fuels too moist for High Risk triggers."
-    ],
-    "erc_pct": 19
-   },
-   {
-    "category": "green",
-    "trigger": null,
-    "all_triggers": [],
-    "why": [
-     "ERC 15.8 (fcst) is about the 18th percentile -> green.",
-     "Fuel moisture: 100-hr 17.2%, 1000-hr 20.0%; KBDI 120.0.",
+     "ERC 15.6 (fcst) is about the 18th percentile -> green.",
+     "Fuel moisture: 100-hr 20.5%, 1000-hr 21.5%; KBDI 118.2.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 18
@@ -1222,16 +1167,71 @@
     "all_triggers": [],
     "why": [
      "ERC 17 (fcst) is about the 20th percentile -> green.",
-     "Fuel moisture: 100-hr 17.7%, 1000-hr 19.9%; KBDI 120.0.",
+     "Fuel moisture: 100-hr 18.6%, 1000-hr 21.4%; KBDI 119.5.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 20
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 16.9 (fcst) is about the 20th percentile -> green.",
+     "Fuel moisture: 100-hr 17.6%, 1000-hr 21.0%; KBDI 119.5.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 20
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 17.7 (fcst) is about the 21st percentile -> green.",
+     "Fuel moisture: 100-hr 17.1%, 1000-hr 20.5%; KBDI 119.5.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 21
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 17.7 (fcst) is about the 21st percentile -> green.",
+     "Fuel moisture: 100-hr 16.7%, 1000-hr 20.2%; KBDI 119.5.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 21
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 18.6 (fcst) is about the 22nd percentile -> green.",
+     "Fuel moisture: 100-hr 16.7%, 1000-hr 19.8%; KBDI 119.5.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 22
+   },
+   {
+    "category": "green",
+    "trigger": null,
+    "all_triggers": [],
+    "why": [
+     "ERC 19 (fcst) is about the 22nd percentile -> green.",
+     "Fuel moisture: 100-hr 16.7%, 1000-hr 19.6%; KBDI 119.5.",
+     "Fuels too moist for High Risk triggers."
+    ],
+    "erc_pct": 22
    }
   ]
  },
  "discussion": "",
  "auto_discussion": [
-  "Today brings gusts of 35 mph or more in northeast, central and southern NM, peaking near 47 mph, and minimum humidity of 16-35%. Sunday through Friday look quiet, with gusts under 35 mph and minimum humidity of 18-30%."
+  "Today brings gusts of 35 mph or more in northern, central and southern NM, peaking near 48 mph, and minimum humidity of 15-33%. Sunday through Friday look quiet, with gusts under 30 mph and minimum humidity of 16-31%."
  ],
  "fires": [],
  "thresholds": {
@@ -1303,7 +1303,7 @@
      null,
      null
     ],
-    "source": "NBM 2026-11-21T01Z"
+    "source": "NBM 2026-11-21T07Z"
    },
    "gust": {
     "label": "Peak wind gust",
@@ -1317,7 +1317,21 @@
      null,
      null
     ],
-    "source": "NBM 2026-11-21T01Z"
+    "source": "NBM 2026-11-21T07Z"
+   },
+   "dlp": {
+    "label": "Dry lightning potential",
+    "unit": "score",
+    "days": [
+     "maps/dlp_d1.png",
+     "maps/dlp_d2.png",
+     "maps/dlp_d3.png",
+     "maps/dlp_d4.png",
+     "maps/dlp_d5.png",
+     "maps/dlp_d6.png",
+     "maps/dlp_d7.png"
+    ],
+    "source": "GFS 2026-11-21T06Z"
    },
    "qpf": {
     "label": "Precipitation",
@@ -1331,11 +1345,11 @@
      null,
      null
     ],
-    "source": "NBM 2026-11-21T01Z",
+    "source": "NBM 2026-11-21T07Z",
     "total": "maps/qpf_total.png"
    }
   },
-  "source": "NBM 2026-11-21T01Z",
+  "source": "NBM 2026-11-21T07Z",
   "featured": {
    "field": "rh",
    "day": 0,
