@@ -1,6 +1,6 @@
 {
  "run": {
-  "created": "2026-11-25T08:03Z",
+  "created": "2026-11-25T14:03Z",
   "models": [
    {
     "model": "AIFS",
@@ -8,27 +8,27 @@
    },
    {
     "model": "GEFS",
-    "init": "2026-11-25T00Z"
+    "init": "2026-11-25T06Z"
    },
    {
     "model": "GFS",
-    "init": "2026-11-25T00Z"
+    "init": "2026-11-25T06Z"
    },
    {
     "model": "HRRR",
-    "init": "2026-11-25T00Z"
+    "init": "2026-11-25T06Z"
    },
    {
     "model": "IFS",
-    "init": "2026-11-24T12Z"
+    "init": "2026-11-25T00Z"
    },
    {
     "model": "NBM",
-    "init": "2026-11-25T01Z"
+    "init": "2026-11-25T07Z"
    },
    {
     "model": "RAP",
-    "init": "2026-11-25T03Z"
+    "init": "2026-11-25T09Z"
    }
   ],
   "method": "Median of available models per PSA-day; spread = model min/max."
@@ -1231,7 +1231,8 @@
  },
  "discussion": "",
  "auto_discussion": [
-  "Today and Thursday look quiet, with gusts under 25 mph and minimum humidity of 16-29%. Friday and Saturday bring gusts of 35 mph or more in much of NM, peaking near 48 mph, and minimum humidity of 15% or lower in southeast AZ and central NM. Sunday brings gusts under 25 mph and minimum humidity of 15% or lower in southeast AZ. Monday and Tuesday bring gusts of 35 mph or more in central AZ and much of NM, peaking near 47 mph, and minimum humidity of 18-37%."
+  "Today looks quiet, with gusts under 30 mph and minimum humidity of 18-29%. Thursday and Friday bring gusts under 35 mph and minimum humidity of 15% or lower in southern AZ. Saturday brings gusts of 35 mph or more in northern and central AZ and all of NM, peaking near 53 mph, and minimum humidity of 15% or lower in southeast AZ and central NM. Sunday brings gusts under 25 mph and minimum humidity of 15% or lower in southeast AZ. Monday brings gusts of 35 mph or more in northern, central and southern NM, peaking near 43 mph, and minimum humidity of 20-37%.",
+  "Tuesday looks quiet, with gusts under 30 mph and minimum humidity of 24-43%."
  ],
  "fires": [],
  "thresholds": {
@@ -1303,7 +1304,7 @@
      null,
      null
     ],
-    "source": "NBM 2026-11-25T01Z"
+    "source": "NBM 2026-11-25T07Z"
    },
    "gust": {
     "label": "Peak wind gust",
@@ -1317,7 +1318,7 @@
      null,
      null
     ],
-    "source": "NBM 2026-11-25T01Z"
+    "source": "NBM 2026-11-25T07Z"
    },
    "qpf": {
     "label": "Precipitation",
@@ -1331,11 +1332,11 @@
      "maps/qpf_d6.png",
      "maps/qpf_d7.png"
     ],
-    "source": "GFS 2026-11-25T00Z",
+    "source": "GFS 2026-11-25T06Z",
     "total": "maps/qpf_total.png"
    }
   },
-  "source": "NBM 2026-11-25T01Z",
+  "source": "NBM 2026-11-25T07Z",
   "featured": {
    "field": "rh",
    "day": 1,
