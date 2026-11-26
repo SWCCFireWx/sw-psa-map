@@ -1,6 +1,6 @@
 {
  "run": {
-  "created": "2026-11-26T08:02Z",
+  "created": "2026-11-26T14:08Z",
   "models": [
    {
     "model": "AIFS",
@@ -8,27 +8,27 @@
    },
    {
     "model": "GEFS",
-    "init": "2026-11-26T00Z"
+    "init": "2026-11-26T06Z"
    },
    {
     "model": "GFS",
-    "init": "2026-11-26T00Z"
+    "init": "2026-11-26T06Z"
    },
    {
     "model": "HRRR",
-    "init": "2026-11-26T00Z"
+    "init": "2026-11-26T06Z"
    },
    {
     "model": "IFS",
-    "init": "2026-11-25T12Z"
+    "init": "2026-11-26T00Z"
    },
    {
     "model": "NBM",
-    "init": "2026-11-26T01Z"
+    "init": "2026-11-26T07Z"
    },
    {
     "model": "RAP",
-    "init": "2026-11-26T03Z"
+    "init": "2026-11-26T09Z"
    }
   ],
   "method": "Median of available models per PSA-day; spread = model min/max."
@@ -117,7 +117,7 @@
     "why": [
      "ERC 20.5 (fcst) is about the 33rd percentile -> green.",
      "Fuel moisture: 100-hr 13.9%, 1000-hr 17.4%; KBDI 4.8.",
-     "Wetting rain (0.43\" today, 0.22\" yesterday) -> green.",
+     "Wetting rain (0.36\" today, 0\" yesterday) -> green.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 33
@@ -186,7 +186,6 @@
     "why": [
      "ERC 33.1 (fcst) is about the 34th percentile -> green.",
      "Fuel moisture: 100-hr 11.8%, 1000-hr 15.1%; KBDI 68.6.",
-     "Wetting rain (0.69\" today, 0\" yesterday) -> green.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 34
@@ -198,7 +197,7 @@
     "why": [
      "ERC 24.9 (fcst) is about the 26th percentile -> green.",
      "Fuel moisture: 100-hr 12.0%, 1000-hr 15.4%; KBDI 68.8.",
-     "Wetting rain (0.43\" today, 0.69\" yesterday) -> green.",
+     "Wetting rain (0.34\" today, 0.11\" yesterday) -> green.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 26
@@ -357,7 +356,6 @@
     "why": [
      "ERC 26.4 (fcst) is about the 44th percentile -> green.",
      "Fuel moisture: 100-hr 13.6%, 1000-hr 16.5%; KBDI 24.7.",
-     "Wetting rain (0.26\" today, 0\" yesterday) -> green.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 44
@@ -437,7 +435,7 @@
     "why": [
      "ERC 20.2 (fcst) is about the 33rd percentile -> green.",
      "Fuel moisture: 100-hr 13.6%, 1000-hr 17.6%; KBDI 11.5.",
-     "Wetting rain (0.74\" today, 0.2\" yesterday) -> green.",
+     "Wetting rain (0.48\" today, 0\" yesterday) -> green.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 33
@@ -517,7 +515,7 @@
     "why": [
      "ERC 25.6 (fcst) is about the 25th percentile -> green.",
      "Fuel moisture: 100-hr 13.1%, 1000-hr 16.4%; KBDI 120.7.",
-     "Wetting rain (0.69\" today, 0.04\" yesterday) -> green.",
+     "Wetting rain (0.62\" today, 0\" yesterday) -> green.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 25
@@ -597,7 +595,7 @@
     "why": [
      "ERC 32.4 (fcst) is about the 38th percentile -> green.",
      "Fuel moisture: 100-hr 11.7%, 1000-hr 15.2%; KBDI 134.1.",
-     "Wetting rain (0.48\" today, 0\" yesterday) -> green.",
+     "Wetting rain (0.3\" today, 0\" yesterday) -> green.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 38
@@ -756,7 +754,6 @@
     "why": [
      "ERC 29.7 (fcst) is about the 46th percentile -> green.",
      "Fuel moisture: 100-hr 12.6%, 1000-hr 16.0%; KBDI 22.2.",
-     "Wetting rain (0.3\" today, 0\" yesterday) -> green.",
      "Fuels too moist for High Risk triggers."
     ],
     "erc_pct": 46
@@ -1239,8 +1236,8 @@
  },
  "discussion": "",
  "auto_discussion": [
-  "Today looks quiet, with gusts under 25 mph and minimum humidity of 15-36%. Friday brings gusts under 35 mph and minimum humidity of 15% or lower in southern AZ. Saturday brings gusts of 35 mph or more in all of NM, peaking near 51 mph, and minimum humidity of 15% or lower in southeast AZ and central NM. Sunday brings gusts under 30 mph and minimum humidity of 15% or lower in southeast AZ. Monday brings gusts of 35 mph or more in northern, central and southern NM, peaking near 43 mph, and minimum humidity of 15% or lower in central NM.",
-  "Tuesday brings gusts of 35 mph or more in northern, central and southwest AZ, peaking near 46 mph, minimum humidity of 21-48%, and wetting rain in northern, central and southwest AZ. Wednesday brings gusts of 35 mph or more in central and southeast AZ and much of NM, peaking near 56 mph, minimum humidity of 22-71%, and wetting rain in all of AZ and northern, central and southern NM. Temperatures cool through the period."
+  "Today looks quiet, with gusts under 25 mph and minimum humidity of 16-34%. Friday brings gusts under 35 mph and minimum humidity of 15% or lower in southern AZ. Saturday brings gusts of 35 mph or more in all of NM, peaking near 54 mph, and minimum humidity of 15% or lower in southeast AZ and central NM. Sunday brings gusts under 30 mph and minimum humidity of 15% or lower in southeast AZ. Monday brings gusts of 35 mph or more in northern and central NM, peaking near 41 mph, and minimum humidity of 15% or lower in central NM.",
+  "Tuesday brings gusts of 35 mph or more in northern and central AZ, peaking near 45 mph, minimum humidity of 19-42%, and wetting rain in west-central AZ. Wednesday brings gusts of 35 mph or more in central and southeast AZ and much of NM, peaking near 47 mph, minimum humidity of 18-70%, scattered thunderstorms in southwest AZ, and wetting rain in all of AZ and northern and west-central NM. Temperatures cool through the period."
  ],
  "fires": [],
  "thresholds": {
@@ -1312,7 +1309,7 @@
      null,
      null
     ],
-    "source": "NBM 2026-11-26T01Z"
+    "source": "NBM 2026-11-26T07Z"
    },
    "gust": {
     "label": "Peak wind gust",
@@ -1326,7 +1323,7 @@
      null,
      null
     ],
-    "source": "NBM 2026-11-26T01Z"
+    "source": "NBM 2026-11-26T07Z"
    },
    "dlp": {
     "label": "Dry lightning potential",
@@ -1340,7 +1337,7 @@
      "maps/dlp_d6.png",
      "maps/dlp_d7.png"
     ],
-    "source": "GFS 2026-11-26T00Z"
+    "source": "GFS 2026-11-26T06Z"
    },
    "qpf": {
     "label": "Precipitation",
@@ -1354,11 +1351,11 @@
      "maps/qpf_d6.png",
      "maps/qpf_d7.png"
     ],
-    "source": "GFS 2026-11-26T00Z",
+    "source": "GFS 2026-11-26T06Z",
     "total": "maps/qpf_total.png"
    }
   },
-  "source": "NBM 2026-11-26T01Z",
+  "source": "NBM 2026-11-26T07Z",
   "featured": {
    "field": "rh",
    "day": 1,
